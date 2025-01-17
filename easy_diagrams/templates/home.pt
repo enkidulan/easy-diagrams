@@ -101,14 +101,16 @@
         </div>
 
         <div class="row gx-4 gx-lg-5 justify-content-md-center">
-          <!-- <div class="col-lg-2 col-md-6 text-center">
-                        <a class="d-block text-body-emphasis text-decoration-none link-dark" href="https://github.com/enkidulan">
-                            <div class="mt-5">
-                                <div class="mb-2"><i class="bi-github fs-1 text-primary"></i></div>
-                                <h3 class="h4 mb-2">Contribute</h3>
-                            </div>
-                        </a>
-                    </div> -->
+          <div class="col-lg-2 col-md-6 text-center">
+            <a class="d-block text-body-emphasis text-decoration-none link-dark"
+               href="https://github.com/enkidulan/easy-diagrams/"
+            >
+              <div class="mt-5">
+                <div class="mb-2"><i class="bi-github fs-1 text-primary"></i></div>
+                <h3 class="h4 mb-2">Contribute</h3>
+              </div>
+            </a>
+          </div>
           <div class="col-lg-2 col-md-6 text-center">
             <a class="d-block text-body-emphasis text-decoration-none link-dark"
                href="mailto:easydiagrams@googlegroups.com"
