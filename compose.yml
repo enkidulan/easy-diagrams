@@ -1,0 +1,30 @@
+services:
+
+  web:
+    # web application
+    build:
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8000
+      DATABASE_URL: postgresql+psycopg://admin:admin@postgres:5432/postgres
+      ED_AUTH_OAUTH_HANDLER: DummyOauthHandler
+    ports:
+      - 8000:8000
+    security_opt:
+      # making env similar to heroku
+      - no-new-privileges:true
+
+  postgres:
+    # database
+    image: postgres:17
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+  pgadmin:

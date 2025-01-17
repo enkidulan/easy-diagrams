@@ -1,0 +1,79 @@
+[tool.poetry]
+name = "easy-diagrams"
+version = "0.1.0"
+description = ""
+authors = ["Maksym Shalenyi <maksym.shalenyi@gmail.com>"]
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# webframework
+pyramid = ">=2.0.2"
+pyramid-chameleon = ">=0.3"
+pyramid-debugtoolbar = ">=4.12.1"
+
+# servers
+waitress = ">=3.0.2" # development
+gunicorn = {extras = ["gevent"], version = ">=23.0.0"} # production
+
+# database
+alembic = ">=1.14.0"
+pyramid-retry = ">=2.1.1"
+pyramid-tm = ">=2.6"
+sqlalchemy = {extras = ["postgresql-psycopg", "postgresql-psycopgbinary"], version = ">=2.0.36"}
+transaction = ">=5.0"
+zope-sqlalchemy = ">=3.1"
+
+# auth
+authomatic = ">=1.3.0"
+
+# other
+base36 = ">=0.1.1"
+pyramid-auto-env = ">=0.1.2"
+pyramid-services = ">=2.2"
+blake3 = ">=1.0.0"
+pydantic = ">=2.10.3"
+sentry-sdk = {extras = ["sqlalchemy"], version = ">=2.19.2"}
+
+
+
+[tool.poetry.group.dev.dependencies]
+webtest = ">=3.0.2"
+pytest = ">=8.3.3"
+pytest-cov = ">=6.0.0"
+pytest-durations = ">=1.3.1"
+pdbpp = ">=0.10.3"
+pytest-postgresql = ">=6.1.1"
+pytest-mock = ">=3.14.0"
+lxml = ">=5.3.0"
+playwright = ">=1.49.1"
+pytest-playwright = ">=0.6.2"
+pytest-retry = "^1.6.3"
+
+
+[tool.poetry.plugins."paste.app_factory"]
+main = "easy_diagrams:main"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --cov=easy_diagrams"
+testpaths = [
+    "tests",
+]
+
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+src_paths = ["easy_diagrams", "test"]
+
+
+[tool.codespell]
+skip = '*.lock'

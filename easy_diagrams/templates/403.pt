@@ -1,0 +1,10 @@
+<div metal:use-macro="load: layout.pt">
+  <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center"
+       metal:fill-slot="masthead"
+  >
+    <h1 class="text-white font-weight-bold">
+      <span class="font-semi-bold">403</span>
+       Forbidden
+    </h1>
+  </div>
+</div>

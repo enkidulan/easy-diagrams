@@ -1,0 +1,23 @@
+<div metal:use-macro="load: layout.pt">
+
+  <div metal:fill-slot="masthead">
+
+    <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
+      <div class="col-lg-8 align-self-end">
+        <h1 class="text-white font-weight-bold">Please log in</h1>
+        <hr class="divider" />
+      </div>
+      <div class="col-lg-8 align-self-baseline">
+        <p class="text-white-75 mb-5">Currently, EasyDiagrams supports only Google social login. If you are interested in having more login options, please
+          <a href="mailto:easydiagrams@googlegroups.com"
+             target="_blank"
+          >email us</a>.</p>
+        <a class="btn btn-primary btn-xl"
+           href="${ request.route_url('social_login', provider_name='google') }"
+           role="button"
+        >Google Login</a>
+      </div>
+    </div>
+  </div>
+
+</div>

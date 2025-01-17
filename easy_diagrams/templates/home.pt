@@ -1,0 +1,157 @@
+<div metal:use-macro="load: layout.pt">
+  <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center"
+       metal:fill-slot="masthead"
+  >
+    <div class="col-lg-8 align-self-end">
+      <h1 class="text-white font-weight-bold">
+                Embed and share PlantUML diagrams anywhere anytime
+      </h1>
+      <hr class="divider" />
+    </div>
+    <div class="col-lg-8 align-self-baseline">
+      <p class="text-white-75 mb-5">
+                Integrate PlantUML seamlessly, and work on your diagrams from any service as if it had supported PlantUML diagrams all along. Don&rsquo;t worry about your diagrams getting out of sync or losing them ever again.
+      </p>
+      <form action="${request.route_url('diagrams')}"
+            method="post"
+      >
+        <input name="csrf_token"
+               type="hidden"
+               value="${get_csrf_token()}"
+        />
+        <button class="btn btn-primary btn-xl"
+                name="create-diagram"
+                type="submit"
+        >Create Diagram</button>
+      </form>
+    </div>
+  </div>
+
+  <div metal:fill-slot="content">
+
+    <!-- About-->
+    <section class="page-section"
+             id="about"
+    >
+      <div class="container px-4 px-lg-5">
+        <h2 class="text-center mt-0">About Easy Diagrams</h2>
+
+
+        <!-- Portfolio-->
+        <div id="portfolio">
+          <div class="container-fluid p-0">
+            <div class="row g-0">
+              <div class="col-lg-4 col-sm-6">
+                <a class="portfolio-box"
+                   href="${request.static_url('easy_diagrams:static/assets/img/editor-view.jpg')}"
+                   title="Editor"
+                >
+                  <img class="img-fluid"
+                       alt="..."
+                       src="${request.static_url('easy_diagrams:static/assets/img/editor-view.jpg')}"
+                  />
+                  <div class="portfolio-box-caption">
+                    <div class="project-category text-white-50">Editor</div>
+                    <div class="project-name">Powerful PlantUML editor</div>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-4 col-sm-6">
+                <a class="portfolio-box"
+                   href="${request.static_url('easy_diagrams:static/assets/img/buitin-editor.jpg')}"
+                   title="BuiltIn Experience"
+                >
+                  <img class="img-fluid"
+                       alt="..."
+                       src="${request.static_url('easy_diagrams:static/assets/img/buitin-editor.jpg')}"
+                  />
+                  <div class="portfolio-box-caption">
+                    <div class="project-category text-white-50">BuiltIn Experience</div>
+                    <div class="project-name">IntegrateEasyDiagram into any site via iframe</div>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-4 col-sm-6">
+                <a class="portfolio-box"
+                   href="${request.static_url('easy_diagrams:static/assets/img/public-image-view.jpg')}"
+                   title="Public Image View"
+                >
+                  <img class="img-fluid"
+                       alt="..."
+                       src="${request.static_url('easy_diagrams:static/assets/img/public-image-view.jpg')}"
+                  />
+                  <div class="portfolio-box-caption">
+                    <div class="project-category text-white-50">Public Image View</div>
+                    <div class="project-name">Share diagram as image</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row g-0">
+          <p class="text-muted lh-lg">
+                        PlantUML is a great tool with many features that I love and frequently use. However, not many note-taking services support PlantUML out of the box (for example, Notion.so). As a result, it&rsquo;s often challenging to incorporate PlantUML into design documentation or to have an interactive design session without constantly switching between the note-taking app and rendering PlantUML.
+
+            <b>EasyDiagrams</b>
+             solves PlantUML&rsquo;s portability problem. Feel free to reach out if you have any questions. Also, if you like it, please consider supporting EasyDiagrams.
+          </p>
+        </div>
+
+        <div class="row gx-4 gx-lg-5 justify-content-md-center">
+          <!-- <div class="col-lg-2 col-md-6 text-center">
+                        <a class="d-block text-body-emphasis text-decoration-none link-dark" href="https://github.com/enkidulan">
+                            <div class="mt-5">
+                                <div class="mb-2"><i class="bi-github fs-1 text-primary"></i></div>
+                                <h3 class="h4 mb-2">Contribute</h3>
+                            </div>
+                        </a>
+                    </div> -->
+          <div class="col-lg-2 col-md-6 text-center">
+            <a class="d-block text-body-emphasis text-decoration-none link-dark"
+               href="mailto:easydiagrams@googlegroups.com"
+            >
+              <div class="mt-5">
+                <div class="mb-2"><i class="bi-chat-left-text fs-1 text-primary"></i></div>
+                <h3 class="h4 mb-2">Contact</h3>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-2 col-md-6 text-center">
+            <a class="d-block text-body-emphasis text-decoration-none link-dark"
+               href="${request.static_url('easy_diagrams:static/legal/terms.html')}"
+            >
+              <div class="mt-5">
+                <div class="mb-2"><i class="bi-journal-check fs-1 text-primary"></i></div>
+                <h3 class="h4 mb-2">Terms</h3>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-2 col-md-6 text-center">
+            <a class="d-block text-body-emphasis text-decoration-none link-dark"
+               href="https://groups.google.com/g/easydiagrams"
+            >
+              <div class="mt-5">
+                <div class="mb-2"><i class="bi-globe fs-1 text-primary"></i></div>
+                <h3 class="h4 mb-2">Community</h3>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-2 col-md-6 text-center">
+            <a class="d-block text-body-emphasis text-decoration-none link-dark"
+               href="https://buymeacoffee.com/enkidulan"
+            >
+              <div class="mt-5">
+                <div class="mb-2"><i class="bi-heart fs-1 text-primary"></i></div>
+                <h3 class="h4 mb-2">Donate</h3>
+                <!-- <p class="text-muted mb-0">Buy me a coffee</p> -->
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,209 @@
+<div metal:use-macro="load: layout.pt">
+  <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light"
+       metal:fill-slot="masthead"
+  >
+    <div class="row">
+
+
+      <div class="col-sm-auto">
+
+        <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+           href="https://plantuml.com/"
+           target="_blank"
+        >
+          PlantUML Reference</a>
+      </div>
+      <div class="col-sm-auto">
+
+        <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+           href="http://real-world-plantuml.com/"
+           target="_blank"
+        >
+          Examples</a>
+      </div>
+
+    </div>
+
+    <div class="row"
+         style="height: calc(100% - 5rem);"
+    >
+
+      <div class="col-4 h-100 border-end"
+           id="editor"
+           hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+           hx-indicator="#spinner"
+           hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+           hx-target="#uml"
+           hx-trigger="keyup changed delay:1s"
+           hx-vals='js:{"code": ace.edit("editor").getValue()}'
+      >${diagram.code}</div>
+
+      <div class="col-8 overflow-auto h-100 border-start"
+           id="uml"
+      >
+        <metal metal:use-macro="load: image.pt"></metal>
+      </div>
+
+    </div>
+
+    <div class="row align-items-center"
+         style="height: 4rem;"
+    >
+
+      <div class="col-sm">
+        <input class="form-control"
+               id="title"
+               aria-label="Title"
+               hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+               hx-indicator="#spinner"
+               hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+               hx-target="#uml"
+               hx-trigger="keyup changed delay:300ms"
+               hx-vals='js:{"title": htmx.find("#title").value}'
+               name="title"
+               placeholder="Title"
+               type="text"
+               value="${diagram.title}"
+        />
+      </div>
+
+      <div class="col-sm-auto">
+        <div class="form-check">
+          <input class="form-check-input"
+                 id="PublicView"
+                 hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+                 hx-indicator="#spinner"
+                 hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+                 hx-target="#uml"
+                 hx-trigger="change"
+                 hx-vals='js:{"is_public": htmx.find("#PublicView").checked}'
+                 type="checkbox"
+                 tal:attributes="
+                   checked diagram.is_public;
+                 "
+          />
+          <label class="form-check-label"
+                 for="PublicView"
+          >Public view
+          </label>
+        </div>
+      </div>
+
+      <div class="col-sm-auto htmx-indicator"
+           id="spinner"
+      >
+        <div class="spinner-border"
+             role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <div class="col-sm-auto text-center">
+        <button class="btn btn-secondary"
+                hx-on-click="navigator.clipboard.writeText('${request.route_url('diagram_view_builtin', diagram_id=diagram.id)}')"
+                type="button"
+                data-bs-container="body"
+                data-bs-content="Copied to clipboard"
+                data-bs-placement="top"
+                data-bs-toggle="popover"
+                data-bs-trigger="focus"
+        >BuiltIn Editor</button>
+      </div>
+
+      <div class="col-sm-auto text-center">
+        <button class="btn btn-secondary"
+                hx-on-click="navigator.clipboard.writeText('${request.route_url('diagram_view_image', diagram_id=diagram.id)}')"
+                type="button"
+                data-bs-container="body"
+                data-bs-content="Image remain private unless 'Public view' is checked. The link is copied to clipboard."
+                data-bs-placement="top"
+                data-bs-toggle="popover"
+                data-bs-trigger="focus"
+        >Image</button>
+      </div>
+
+      <div class="col-sm-auto text-center">
+        <button class="btn btn-secondary"
+                type="button"
+                data-bs-target="#deleteConfirmModal"
+                data-bs-toggle="modal"
+        >Delete</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <metal metal:fill-slot="content"
+         tal:omit-tag=""
+  >
+    <div class="modal"
+         id="deleteConfirmModal"
+         tabindex="-1"
+         data-backdrop="false"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Diagram</h5>
+            <button class="btn-close"
+                    aria-label="Close"
+                    type="button"
+                    data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>After you delete the diagram, all external references to it will stop working, and
+              you will not be able to restore the diagram.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary"
+                    type="button"
+                    data-bs-dismiss="modal"
+            >Close</button>
+            <button class="btn btn-danger"
+                    hx-delete="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+                    hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+                    type="button"
+            >Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </metal>
+
+
+  <metal metal:fill-slot="scripts"
+         tal:omit-tag=""
+  >
+
+    <script crossorigin="anonymous"
+            integrity="sha256-UZyfOGYXf+kRx6BlpfMIaIkqlwtpp5tSqYsB+0QfaA4="
+            src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-min-noconflict/ace.js"
+    ></script>
+    <script crossorigin="anonymous"
+            integrity="sha256-QYtRGCAF2FEla9w5pwlaEgKvuf3SEAqk+QdbliP7HBU="
+            src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-min-noconflict/theme-monokai.js"
+    ></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
+            src="https://unpkg.com/htmx.org@2.0.3"
+    ></script>
+
+    <script type="text/javascript">
+      (function() {
+      var editor = ace.edit("editor");
+      editor.setKeyboardHandler("ace/keyboard/sublime");
+      const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+      const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new
+      bootstrap.Popover(popoverTriggerEl))
+
+      })();
+    </script>
+
+
+  </metal>
+
+</div>

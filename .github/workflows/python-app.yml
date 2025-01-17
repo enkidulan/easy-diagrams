@@ -1,0 +1,94 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Run linters and tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+
+    - name: Dependencies cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/
+          ~/.local/
+          /var/lib/apt/lists/*.lz4
+        key: poetry-cache-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-${{ hashFiles('poetry.lock', '.pre-commit-config.yaml', '.github/workflows/python-app.yml') }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip pipx
+        pipx install poetry pre-commit doit
+        doit install
+
+    - name: Lint
+      run: doit lint
+
+    - name: Install Playwright Browsers
+      run:  poetry run playwright install chromium-headless-shell --with-deps
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build image
+      uses: docker/build-push-action@v6
+      with:
+        load: true
+        push: false
+        tags: |
+          easy_diagram:test-build
+          registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Test with pytest
+      env:
+        DATABASE_URL: postgresql+psycopg://admin:admin@127.0.0.1:5432/postgres
+        ED_AUTH_OAUTH_HANDLER: DummyOauthHandler
+      run: |
+        docker run --rm -e DATABASE_URL="$DATABASE_URL" -e ED_AUTH_OAUTH_HANDLER="$ED_AUTH_OAUTH_HANDLER" --network="host" -d -p 8000:8000 --name test-build easy_diagram:test-build
+        doit alembic_upgrade
+        doit test -p "-vvs"
+
+    - name: Push docker image to Heroku
+      env:
+        HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
+        HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: |
+        echo ${{ secrets.HEROKU_API_KEY }} | docker login \
+          --username=${{ secrets.HEROKU_EMAIL }} \
+          registry.heroku.com \
+          --password-stdin
+        curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+        docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+        # Release the image to Heroku errors are ignored
+        heroku container:release web --app ${HEROKU_APP_NAME} || true
+
+    - name: Docker logs
+      run: docker logs test-build
+      if: always()

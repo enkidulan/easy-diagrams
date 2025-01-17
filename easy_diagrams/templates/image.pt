@@ -1,0 +1,4 @@
+<img id="diagram_image"
+     src="data:image/svg+xml;base64,${diagram.render.image_base64}"
+     tal:condition="diagram.render"
+/>

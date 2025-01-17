@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1"
+    />
+    <title>EasyDiagrams BuiltIn Editor</title>
+    <link crossorigin="anonymous"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          rel="stylesheet"
+    />
+    <style media="screen"
+           type="text/css"
+    >
+      #editor {
+      width: 100%;
+      height: 600px;
+      }
+      .collapsible::after {
+      content: "▼";
+      font-weight: bold;
+      transition: transform 0.3s ease, color 0.3s ease;
+      }
+      .collapsible.expanded::after {
+      content: "▲";
+      transform: rotate(180deg);
+      }
+      .htmx-indicator {
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container-fluid">
+      <div class="row w-100 text-center">
+        <figcaption class="figure-caption">
+          <a class="link-dark link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+             id="display-title"
+             href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
+             target="_blank"
+          >
+            ${diagram.title}</a>
+          <small class="collapsible"
+                 hx-on-click="htmx.toggleClass('.collapsible', 'expanded'); htmx.toggleClass('.collapsible-content', 'd-none')"
+          >(click here to edit)</small>
+
+
+          <div class="htmx-indicator"
+               id="spinner"
+          >
+            <div class="spinner-border spinner-border-sm"
+                 role="status"
+            >
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+
+
+        </figcaption>
+      </div>
+      <div class="row h-100 w-100 text-center">
+        <div class="col w-100 collapsible-content d-none">
+          <div class="row">
+            <div class="col-sm-auto">
+
+              <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+                 href="https://plantuml.com/"
+                 target="_blank"
+              >
+                PlantUML Reference</a>
+            </div>
+            <div class="col-sm-auto">
+
+              <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+                 href="http://real-world-plantuml.com/"
+                 target="_blank"
+              >
+                Examples</a>
+            </div>
+
+            <div class="col-sm">
+              <input class="form-control"
+                     id="title"
+                     aria-label="Title"
+                     hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+                     hx-indicator="#spinner"
+                     hx-on-keyup="htmx.find('#display-title').innerText = htmx.find('#title').value"
+                     hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+                     hx-target="#uml"
+                     hx-trigger="keyup changed delay:300ms"
+                     hx-vals='js:{"title": htmx.find("#title").value}'
+                     name="title"
+                     placeholder="Title"
+                     type="text"
+                     value="${diagram.title}"
+              />
+            </div>
+
+          </div>
+
+          <div class="border-end"
+               id="editor"
+               hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+               hx-indicator="#spinner"
+               hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+               hx-target="#uml"
+               hx-trigger="keyup changed delay:1s"
+               hx-vals='js:{"code": ace.edit("editor").getValue()}'
+          >${diagram.code}</div>
+        </div>
+        <div class="col overflow-auto"
+             id="uml"
+        >
+          <metal metal:use-macro="load: image.pt"></metal>
+
+        </div>
+      </div>
+
+    </div>
+
+    <script crossorigin="anonymous"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    ></script>
+    <script crossorigin="anonymous"
+            integrity="sha256-UZyfOGYXf+kRx6BlpfMIaIkqlwtpp5tSqYsB+0QfaA4="
+            src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-min-noconflict/ace.js"
+    ></script>
+    <script crossorigin="anonymous"
+            integrity="sha256-QYtRGCAF2FEla9w5pwlaEgKvuf3SEAqk+QdbliP7HBU="
+            src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-min-noconflict/theme-monokai.js"
+    ></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
+            src="https://unpkg.com/htmx.org@2.0.3"
+    ></script>
+
+    <script>
+      var editor = ace.edit("editor");
+      editor.setKeyboardHandler("ace/keyboard/sublime");
+    </script>
+
+  </body>
+</html>
