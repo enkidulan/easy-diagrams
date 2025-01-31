@@ -75,3 +75,14 @@ The project uses GitHub Actions for CI/CD. The configuration is stored in
 ``.github/workflows`` directory.
 
 Heroku Docker is used for deployment.
+
+Docker images
+^^^^^^^^^^^^^^^^^^^^
+
+The project uses ``enkidulan/plantuml`` Docker images as a base for the PlantUML,
+the image is build from ``Dockerfile.plantuml`` and pushed to Docker:
+
+.. code-block:: bash
+
+    docker build -t enkidulan/plantuml:1.2024.8 -t enkidulan/plantuml:latest --build-arg PLANTUML_VERSION=1.2024.8 -f Dockerfile.plantuml .
+    docker push enkidulan/plantuml:1.2024.8
