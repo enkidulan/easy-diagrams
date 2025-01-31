@@ -15,9 +15,9 @@
            tal:content="context/title | python:None"
     >EasyDiagrams</title>
     <!-- Favicon-->
-    <link href="${request.static_url('easy_diagrams:static/assets/favicon.ico')}"
+    <link href="${request.static_url('easy_diagrams:static/assets/favicon.png')}"
           rel="icon"
-          type="image/x-icon"
+          type="image/png"
     />
     <!-- Bootstrap Icons-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css"
