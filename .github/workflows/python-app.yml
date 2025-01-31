@@ -59,9 +59,7 @@ jobs:
       with:
         load: true
         push: false
-        tags: |
-          easy_diagram:test-build
-          registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
+        tags: easy_diagram:test-build
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -73,21 +71,6 @@ jobs:
         docker run --rm -e DATABASE_URL="$DATABASE_URL" -e PORT=8000 -e ED_AUTH_OAUTH_HANDLER="$ED_AUTH_OAUTH_HANDLER" --network="host" -d -p 8000:8000 --name test-build easy_diagram:test-build
         doit alembic_upgrade
         doit test -p "-vvs"
-
-    - name: Push docker image to Heroku
-      env:
-        HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME }}
-        HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      run: |
-        echo ${{ secrets.HEROKU_API_KEY }} | docker login \
-          --username=${{ secrets.HEROKU_EMAIL }} \
-          registry.heroku.com \
-          --password-stdin
-        curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
-        docker push registry.heroku.com/${{ secrets.HEROKU_APP_NAME }}/web
-        # Release the image to Heroku errors are ignored
-        heroku container:release web --app ${HEROKU_APP_NAME} || true
 
     - name: Docker logs
       run: docker logs test-build
