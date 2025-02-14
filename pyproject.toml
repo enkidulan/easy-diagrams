@@ -6,7 +6,8 @@ authors = ["Maksym Shalenyi <maksym.shalenyi@gmail.com>"]
 readme = "README.rst"
 
 [tool.poetry.dependencies]
-python = "^3.13"
+# authomatic does not support python newer than 3.11 see https://github.com/authomatic/authomatic/issues/235
+python = "^3.11"
 
 # webframework
 pyramid = ">=2.0.2"
