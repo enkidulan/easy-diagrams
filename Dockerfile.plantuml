@@ -1,4 +1,4 @@
-FROM python:3.13-alpine
+FROM python:3.11-alpine
 ARG PLANTUML_VERSION=1.2024.8
 
 RUN  apk update \
