@@ -157,6 +157,7 @@ Model
 The initial model will accommodate the basic functionality of user and diagram records. Both code and image are stored as diagram properties; the `is_public` property is used for access control.
 
 .. image:: https://easydiagrams.work/diagrams/jT3oIjGnZhLoSHJlYzOeP8XkRjmdUjmY/image.svg
+    :target: https://easydiagrams.work/diagrams/jT3oIjGnZhLoSHJlYzOeP8XkRjmdUjmY
     :align: center
 
 Workflow
@@ -165,6 +166,7 @@ Workflow
 Given that the initial MVP doesn’t have to deal with large scale and load, most of the interactions are trivial to the point that many mainstream web frameworks provide needed functionality out-of-the-box. The only challenging part is the requests that involve PlantUML rendering, as it takes a long time to transform code into image, anywhere from 0.7 to 1.5  seconds. The right approach to deal with slow tasks is to decouple them from a request lifetime via any of the asynchronous processing methods (message queue, events, etc…). Nonetheless, for the initial MVP it makes more sense to keep it simple and have the synchronous execution flow for all requests, even ones that are slow and include PlantUML rendering:
 
 .. image:: https://easydiagrams.work/diagrams/malJ31fEBmO1HqWXM1BcC46tYyRM5Ell/image.svg
+    :target: https://easydiagrams.work/diagrams/malJ31fEBmO1HqWXM1BcC46tYyRM5Ell
     :align: center
 
 The downside of this approach is that **PlantUML rendering requests will clog the system** as they are **30x times slower** than other types of requests (1400 ms for rendering image vs 40 ms viewing).  Introducing **non-rendering instances will mitigate the issue**, which can be easily achieved with reverse proxy redirecting all requests involving changes to UML to dedicated instances.
@@ -186,6 +188,7 @@ Stack
 For small applications, Heroku is the easiest option for managing infrastructure, as it takes care of many tasks: TLS/SSL, routing, discovery, code delivery, database management, logging, performance monitoring, and error tracking. Additionally, Heroku offers a good deal in terms of price and functionality. Web application will be shipped as a Docker container that is build with GitHub Actions as a CI/CD pipeline.
 
 .. image:: https://easydiagrams.work/diagrams/uJXaWLmPOopwiWiEvWz0vLI32Ru7ZXG1/image.svg
+    :target: https://easydiagrams.work/diagrams/uJXaWLmPOopwiWiEvWz0vLI32Ru7ZXG1
     :align: center
 
 
@@ -385,7 +388,9 @@ caching. The approach involves adding two version fields, **code_version** and
 If **image_version** does not match **code_version**, it indicates that the image is
 outdated and should be regenerated, or that the code is invalid.
 
-`Image versioning example <https://easydiagrams.work/diagrams/gNeq7FKv3nVR7Fzi8XS0V11nsqcyrzyK/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/gNeq7FKv3nVR7Fzi8XS0V11nsqcyrzyK/image.svg
+    :target: https://easydiagrams.work/diagrams/gNeq7FKv3nVR7Fzi8XS0V11nsqcyrzyK
+    :align: center
 
 Step 2. Async Image Rendering
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -406,7 +411,9 @@ require additional infrastructure, but a backoff safeguard is necessary to mitig
 possibility of DoS-ing the service. Eventually, long polling can be replaced with WebSockets
 or server push notifications for more efficient updates.
 
-`Async rendering example <https://easydiagrams.work/diagrams/d6FVp61ao9bTwqFRZNp0mNzcg7g9rbDH/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/d6FVp61ao9bTwqFRZNp0mNzcg7g9rbDH/image.svg
+    :target: https://easydiagrams.work/diagrams/d6FVp61ao9bTwqFRZNp0mNzcg7g9rbDH
+    :align: center
 
 To communicate with workers, the server uses a queue table in the same database that stores
 the diagram data. This design choice follows the **transactional outbox pattern** to
@@ -416,7 +423,9 @@ messaging brokers like RabbitMQ or SQS. However, PostgreSQL naturally supports t
 ``INSERT INTO … ON CONFLICT (id) DO UPDATE`` syntax. Since the database is already
 provisioned, this approach also avoids introducing any additional infrastructure overhead.
 
-`Transactional outbox example <https://easydiagrams.work/diagrams/Fge9fF4CaTCXqOJOaolVz0sCuTFq7b6V/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/Fge9fF4CaTCXqOJOaolVz0sCuTFq7b6V/image.svg
+    :target: https://easydiagrams.work/diagrams/Fge9fF4CaTCXqOJOaolVz0sCuTFq7b6V
+    :align: center
 
 The downside of this approach is that managing the queue table is now the responsibility of
 the application logic. However, there are many frameworks that provide the required
@@ -471,7 +480,9 @@ in external services. For editing, the editor explicitly provides the image vers
 version that is equal to or newer than what the editor requested. Consequently, the editor
 sees the latest version instead of any stale cached content.
 
-`Caching example <https://easydiagrams.work/diagrams/vt9MBbfOHqgMTTGyxODev3xipiblIAYZ/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/vt9MBbfOHqgMTTGyxODev3xipiblIAYZ/image.svg
+    :target: https://easydiagrams.work/diagrams/vt9MBbfOHqgMTTGyxODev3xipiblIAYZ
+    :align: center
 
 While an editor can see the updates right away, additional logic is needed to promote
 changes to other users. This is where the eviction process comes in: every two minutes,
@@ -480,7 +491,9 @@ and evicts them from the cache. The cache, by default, has an eviction timeout o
 so even if the eviction process fails, the record won’t stay in the cache for more than a
 day.
 
-`Eviction process example <https://easydiagrams.work/diagrams/gDz2oz8WLArSguDWgkMsMsrUdQGcJuu6/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/gDz2oz8WLArSguDWgkMsMsrUdQGcJuu6/image.svg
+    :target: https://easydiagrams.work/diagrams/gDz2oz8WLArSguDWgkMsMsrUdQGcJuu6
+    :align: center
 
 The eviction process uses long polling on the database, which does create some additional
 load, but it’s much simpler and more reliable than using pub-sub, and it does not require
@@ -544,11 +557,15 @@ The extended model must support the following use cases:
 - A folder or diagram can belong to only one folder at a time.
 - A user can make a diagram publicly accessible.
 
-`New model example <https://easydiagrams.work/diagrams/gcIoNGCclM1lMZ5P3ExT7Hu72FZx21VC/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/gcIoNGCclM1lMZ5P3ExT7Hu72FZx21VC/image.svg
+    :target: https://easydiagrams.work/diagrams/gcIoNGCclM1lMZ5P3ExT7Hu72FZx21VC
+    :align: center
 
 SQL ERD for the new model:
 
-`SQL ERD <https://easydiagrams.work/diagrams/LI3vzyrzPrUyk1fwdCgwwfiwiAgGDAyi/builtin>`_
+.. image:: https://easydiagrams.work/diagrams/LI3vzyrzPrUyk1fwdCgwwfiwiAgGDAyi/image.svg
+    :target: https://easydiagrams.work/diagrams/LI3vzyrzPrUyk1fwdCgwwfiwiAgGDAyi
+    :align: center
 
 In the new model, sharding is done by account, with minimal denormalization of the user
 model. The constraint changes from requiring a globally unique user email to ensuring that
