@@ -23,7 +23,6 @@ class PlantUMLRendererService:
 
 
 def convert(puml, use_local_plantuml=False) -> bytes:
-    # TODO: add local vs prod diagram rendering invocation
 
     if use_local_plantuml:
         cmd = ["plantuml", "-tsvg", "-p"]

@@ -10,8 +10,6 @@ from sqlalchemy.orm import relationship
 
 from .meta import Base
 
-# TODO: add design notes why no domain for user and why user is used directly
-
 
 class User(Base):
     """User model."""

@@ -9,4 +9,4 @@ from pyramid.view import view_config
     permission=NO_PERMISSION_REQUIRED,
 )
 def home_view(request):
-    return {"one": "one", "project": "easy_diagrams"}  # TODO: remove this
+    return {}

@@ -56,11 +56,8 @@ class SecurityPolicy:
 
 def includeme(config: Configurator):
     settings = config.get_settings()
-    # TODO: samesite="None" is set here for the sake of the builtin view that
-    #       has to work in iframe, but samesite="None" defeats the purpose
-    #       of the csrf token... it should be set to "Lax" for the rest, so
-    #       see if csrf can be configured per view, as only a single view that
-    #       handles put-request has to work within the iframe.
+    # NOTE: Setting samesite="None" and secure=True to ensure that the app
+    #       works in iframe and with HTTPS.
     config.set_csrf_storage_policy(
         CookieCSRFStoragePolicy(samesite="None", secure=True)
     )

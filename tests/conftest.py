@@ -1,5 +1,5 @@
 import os
-import os.path  # TODO: replace with pathlib
+import os.path
 import random
 import time
 
