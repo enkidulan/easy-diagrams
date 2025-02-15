@@ -226,7 +226,7 @@ Analysis
 --------
 
 Access Patterns
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 There are several different types of traffic that the system will have to handle:
 
@@ -259,7 +259,7 @@ with the number of active users. The initial MVP can handle 3K RPS, which is qui
 for a demo project, but for production, it may be too low given the nature of the traffic.
 
 Benchmarks
-^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Benchmarking is done on System76 24GB Intel i7-10510U laptop with 100/10 Mb internet speed
 access against the following server configuration:
@@ -370,7 +370,7 @@ one. Low-priority items remain at the bottom. While performance optimization and
 horizontal scaling are top priorities, the plan also aims to keep scaling to a minimum.
 
 Step 1. Image Versioning
-^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Image versioning** is important because it enables asynchronous rendering and effective
 caching. The approach involves adding two version fields, **code_version** and
@@ -388,7 +388,7 @@ outdated and should be regenerated, or that the code is invalid.
 `Image versioning example <https://easydiagrams.work/diagrams/gNeq7FKv3nVR7Fzi8XS0V11nsqcyrzyK/builtin>`_
 
 Step 2. Async Image Rendering
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Context**: PlantUML requires about 0.5 to 1.5 seconds to render an image. Making a UI request wait
 that long for a rendered image is detrimental to scalability because it blocks the server
@@ -428,7 +428,7 @@ based on the ``diagram_id``, ensuring that each diagram has at most one associat
 - `Dramatiq PostgreSQL broker <https://gitlab.com/dalibo/dramatiq-pg/-/blob/master/dramatiq_pg/broker.py?ref_type=heads#L108>`_
 
 Step 3. Caching
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Goal**:Reduce database load.
 
@@ -460,8 +460,7 @@ long-term storage that doesn’t require significant RAM is the best option for 
 especially as diskcache supports sharing the cache among multiple processes and can offer
 performance similar to or better than Memcache or Redis.
 
-Query Workflow for the Image Endpoint
-'''''''''''''''''''''''''''''''''''''
+Query Workflow for the Image Endpoint:
 
 1. Check if the requested diagram is in the cache.
 2. If not, query the database.
@@ -508,7 +507,7 @@ the local cache without making any DB queries.
    100000 loops, best of 3: 11.8 µs per loop
 
 Step 4. Extending Model and Database Sharding
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Goal**:Extend the existing model and provide a basis for effective DB sharding.
 
@@ -524,8 +523,8 @@ accounts. A diagram can be placed in a folder, and a folder can be placed in ano
 A folder or diagram can belong to only one folder at most. A user can make a diagram
 publicly accessible.
 
-Extend the Existing Model for Effective Database Sharding
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+Extend the Existing Model for Effective Database Sharding:
+
 
 The MVP’s initial model offers only the most basic features and does not support many of
 the functionalities users typically expect, such as organizing diagrams in folders or
