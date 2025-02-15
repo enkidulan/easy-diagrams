@@ -1,4 +1,7 @@
 <img id="diagram_image"
-     src="data:image/svg+xml;base64,${diagram.render.image_base64}"
+     src="data:image/svg+xml;base64,${b64encode(diagram.render.image).decode()}"
+     tal:define="
+       b64encode import: base64.b64encode;
+     "
      tal:condition="diagram.render"
 />

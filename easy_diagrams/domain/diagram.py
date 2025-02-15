@@ -1,4 +1,3 @@
-import base64
 from datetime import datetime
 from typing import Annotated
 from typing import NewType
@@ -8,19 +7,13 @@ from pydantic import ConfigDict
 from pydantic import StringConstraints
 from pydantic.dataclasses import dataclass
 
-# TODO: add design notes to Readme to why the frozen=True is used
-
-DiagramID = NewType("DiagramID", str)  # TODO: limit len to 64
+DiagramID = NewType("DiagramID", str)
 
 
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
 class DiagramRender:
     image: bytes
-    version: int  # TODO: enforce proper versioning
-
-    @property
-    def image_base64(self):  # TODO: move to a presenter, remove from here
-        return base64.b64encode(self.image).decode()
+    version: int
 
 
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
