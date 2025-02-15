@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 from pydantic import ValidationError
 from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.httpexceptions import HTTPNotFound
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.request import Request
 from pyramid.response import Response
@@ -11,7 +10,6 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
-from easy_diagrams import exceptions
 from easy_diagrams import interfaces
 from easy_diagrams.domain.diagram import Diagram
 from easy_diagrams.domain.diagram import DiagramEdit
@@ -57,10 +55,7 @@ class DiagramResourceMixin(DiagramsRepoViewMixin):
 
     @property
     def diagram(self):
-        try:
-            return self.diagram_repo.get(self.requested_diagram_id)
-        except exceptions.DiagramNotFoundError:
-            raise HTTPNotFound()
+        return self.diagram_repo.get(self.requested_diagram_id)
 
 
 @view_defaults(request_method="GET")
@@ -97,10 +92,7 @@ class DiagramViews(DiagramResourceMixin):
         permission=NO_PERMISSION_REQUIRED,
     )
     def rendered_image(self):
-        try:
-            image = self.diagram_repo.get_image_render(self.requested_diagram_id)
-        except exceptions.DiagramNotFoundError:
-            raise HTTPNotFound()
+        image = self.diagram_repo.get_image_render(self.requested_diagram_id)
         response = Response(body=image)
         response.content_type = "image/svg+xml"
         response.headers["Content-Disposition"] = (
@@ -121,26 +113,15 @@ class DiagramEntity(DiagramResourceMixin):
             changes = DiagramEdit(**self.request.params)
         except ValidationError as e:
             raise HTTPBadRequest(e)
-
-        try:
-            diagram: Diagram = self.diagram_repo.edit(
-                self.requested_diagram_id, changes
-            )
-        except exceptions.DiagramNotFoundError:
-            raise HTTPNotFound()
-
+        diagram: Diagram = self.diagram_repo.edit(self.requested_diagram_id, changes)
         return {"diagram": diagram}
 
     @view_config(request_method="DELETE")
     def diagram_delete(self):
-        try:
-            self.diagram_repo.delete(self.requested_diagram_id)
-        except exceptions.DiagramNotFoundError:
-            raise HTTPNotFound()
-        else:
-            return Response(
-                status=204, headers={"Hx-Redirect": self.request.route_url("diagrams")}
-            )
+        self.diagram_repo.delete(self.requested_diagram_id)
+        return Response(
+            status=204, headers={"Hx-Redirect": self.request.route_url("diagrams")}
+        )
 
     @view_config(request_method="GET")
     def diagram_get(self):
