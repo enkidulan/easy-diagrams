@@ -3,8 +3,6 @@ import string
 import time
 from datetime import datetime
 
-import base36
-from blake3 import blake3
 from sqlalchemy import BigInteger
 from sqlalchemy import Boolean
 from sqlalchemy import Column
@@ -71,12 +69,6 @@ class DiagramTable(Base):
     # image
     _image_version = Column("image_version", BigInteger, nullable=True)
     _image = Column("image", BYTEA, nullable=True)
-
-    @property
-    def short_id(self):
-        """Short version of the id."""
-        digest = int(blake3(self.id.encode()).hexdigest(length=4), 16)
-        return base36.dumps(digest)
 
     @hybrid_property
     def code(self):
