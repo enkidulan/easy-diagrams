@@ -180,16 +180,13 @@
   >
 
     <script crossorigin="anonymous"
-            integrity="sha256-UZyfOGYXf+kRx6BlpfMIaIkqlwtpp5tSqYsB+0QfaA4="
-            src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-min-noconflict/ace.js"
+            src="https://cdn.jsdelivr.net/npm/ace-builds@1.38.0/src-min-noconflict/ace.js"
     ></script>
     <script crossorigin="anonymous"
-            integrity="sha256-QYtRGCAF2FEla9w5pwlaEgKvuf3SEAqk+QdbliP7HBU="
-            src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-min-noconflict/theme-monokai.js"
+            src="https://cdn.jsdelivr.net/npm/ace-builds@1.38.0/src-min-noconflict/theme-monokai.js"
     ></script>
     <script crossorigin="anonymous"
-            integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
-            src="https://unpkg.com/htmx.org@2.0.3"
+            src="https://unpkg.com/htmx.org@2.0.4"
     ></script>
 
     <script type="text/javascript">
