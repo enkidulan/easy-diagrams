@@ -55,7 +55,6 @@ def test_create_all_empty(dbsession, user):
     dbsession.flush()
     assert diagram.id is not None
     assert diagram.code_version is None
-    assert diagram.code_is_valid is None
     assert diagram.code is None
     assert diagram.image_version is None
     assert diagram.image is None
@@ -97,30 +96,3 @@ def test_update_image(dbsession, diagram):
     dbsession.flush()
     assert diagram.image == b"2"
     assert diagram.image_version == 222222222222222222
-    assert diagram.code_is_valid is True
-
-
-def test_set_code_is_valid(dbsession, user):
-    diagram = models.DiagramTable(user=user)
-    with pytest.raises(
-        ValueError, match="By hand setting code_is_valid is allowed only to False."
-    ):
-        diagram.code_is_valid = True
-    assert diagram.code_is_valid is None
-
-
-def test_set_code_is_invalid(dbsession, user):
-    diagram = models.DiagramTable(user=user)
-    diagram.code_is_valid = False
-    dbsession.add(diagram)
-    dbsession.flush()
-    assert diagram.code_is_valid is False
-
-
-def test_update_code_resets_code_is_valid(dbsession, diagram, monkeypatch):
-    monkeypatch.setattr(models.diagram, "_gen_code_version", lambda: 333333333333333333)
-    diagram.code = "new_code"
-    dbsession.flush()
-    assert diagram.code == "new_code"
-    assert diagram.code_version == 333333333333333333
-    assert diagram.code_is_valid is None

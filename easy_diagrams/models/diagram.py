@@ -34,9 +34,8 @@ class DiagramTable(Base):
 
     Diagrams are stored in the database. They have a code and an image. The code is a textual representation of the diagram that can be used to generate the image. The image is a binary representation of the diagram that can be displayed to the user.
 
-    The version fields `code_version` and `image_version` are used to track the changes in the code and image. `code_version` is generated automatically when code is set. The version is a number that is unique for each change of the code. If `image_version` is not the same as `code_version` it means that the image is outdated and should be regenerated or the code is invalid.
+    The version fields `code_version` and `image_version` are used to track the changes in the code and image. `code_version` is generated automatically when code is set. The version is a number that is unique for each change of the code. If `image_version` is not the same as `code_version` it means that the image is outdated and should be regenerated.
 
-    The `code_is_valid` field is used to track if the code is valid. If the code is invalid the image can't be generated. The field can be set only after the code rendering is attempted.
     """
 
     __tablename__ = "diagrams"
@@ -57,16 +56,15 @@ class DiagramTable(Base):
         DateTime, index=True, onupdate=datetime.now, default=datetime.now
     )
 
-    # user relationship
+    #: User relationship
     user_id = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     user = relationship("User", back_populates="diagrams")
 
-    # code
+    #: UML code
     _code_version = Column("code_version", BigInteger, nullable=True)
     _code = Column("code", String(10_240), nullable=True)  # 10K characters limit
-    _code_is_valid = Column("code_is_valid", Boolean, nullable=True)
 
-    # image
+    #: Rendered UML image
     _image_version = Column("image_version", BigInteger, nullable=True)
     _image = Column("image", BYTEA, nullable=True)
 
@@ -78,23 +76,12 @@ class DiagramTable(Base):
     @code.inplace.setter
     def _code_setter(self, value):
         self._code = value
-        self._code_is_valid = None
         self._code_version = _gen_code_version()
 
     @hybrid_property
     def code_version(self):
         """The version of the code of the diagram. This is generated when the code is set and can't be set manually."""
         return self._code_version
-
-    @hybrid_property
-    def code_is_valid(self):
-        return self._code_is_valid
-
-    @code_is_valid.setter
-    def code_is_valid(self, value):
-        if value is not False:
-            raise ValueError("By hand setting code_is_valid is allowed only to False.")
-        self._code_is_valid = value
 
     @hybrid_property
     def image(self):
@@ -112,4 +99,3 @@ class DiagramTable(Base):
         """
         self._image = image
         self._image_version = version
-        self._code_is_valid = True
