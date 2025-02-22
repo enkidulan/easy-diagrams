@@ -30,6 +30,17 @@ def task__create_env_file():
     }
 
 
+def task__docker_up():
+    """Setup pre-commit hooks."""
+    return {
+        "actions": [
+            "docker compose down",
+            "docker compose build",
+            "docker compose up -d",
+        ],
+    }
+
+
 def task_install():
     """Install project."""
     return {
@@ -49,7 +60,7 @@ def task_test():
     """Run tests."""
     return {
         "actions": [tools.Interactive("poetry run pytest %(params)s")],
-        "task_dep": ["install"],
+        "task_dep": ["install", "_docker_up"],
         "verbosity": 2,
         "params": [
             {
