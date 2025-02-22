@@ -1,5 +1,5 @@
 FROM python:3.11-alpine
-ARG PLANTUML_VERSION=1.2024.8
+ARG PLANTUML_VERSION=1.2025.1
 
 RUN  apk update \
   && apk upgrade \
