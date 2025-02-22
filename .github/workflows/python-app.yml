@@ -70,7 +70,7 @@ jobs:
       run: |
         docker run --rm -e DATABASE_URL="$DATABASE_URL" -e PORT=8000 -e ED_AUTH_OAUTH_HANDLER="$ED_AUTH_OAUTH_HANDLER" --network="host" -d -p 8000:8000 --name test-build easy_diagram:test-build
         doit alembic_upgrade
-        doit test -p "-vvs"
+        poetry run pytest -vvs
 
     - name: Docker logs
       run: docker logs test-build
