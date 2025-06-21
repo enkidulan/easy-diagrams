@@ -9,7 +9,6 @@ from pyramid.response import Response
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from pyramid.view import view_defaults
-from slugify import slugify
 
 from easy_diagrams import interfaces
 from easy_diagrams.domain.diagram import Diagram
@@ -106,7 +105,8 @@ class DiagramViews(DiagramResourceMixin):
         image = self.diagram_repo.get_image_render(self.requested_diagram_id)
         response = Response(body=image)
         response.content_type = f"image/{file_format}"
-        name = slugify(self.diagram.title or "image")
+        # name = slugify(self.diagram.title or "image")
+        name = "image"
         response.headers["Content-Disposition"] = f"filename={name}.{file_format}"
         return response
 
