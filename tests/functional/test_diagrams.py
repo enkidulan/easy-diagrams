@@ -283,7 +283,7 @@ class TestDiagramImage:
     """
 
     def test_image_view(self, testapp, csrf_headers, diagram):
-        resp = testapp.get(f"/diagrams/{diagram['id']}/image.svg", status=200)
+        resp = testapp.get(f"/diagrams/{diagram['id']}/image.png", status=200)
         assert resp.body == b"dummy_image"
 
     def test_not_public_images_accessible_only_to_owner(
@@ -291,23 +291,23 @@ class TestDiagramImage:
     ):
         # only owner can access the image if it's not public
         testapp.login(user_factory().email)
-        testapp.get(f"/diagrams/{diagram['id']}/image.svg", status=404)
+        testapp.get(f"/diagrams/{diagram['id']}/image.png", status=404)
 
         # the view is accessible to not logged in users,
         # but they will get 404 if the diagram it's not public
         testapp.logout()
-        testapp.get(f"/diagrams/{diagram['id']}/image.svg", status=404)
+        testapp.get(f"/diagrams/{diagram['id']}/image.png", status=404)
 
     def test_view_not_existing_diagram(self, testapp, csrf_headers):
         testapp.login()
-        res = testapp.get("/diagrams/abcd/image.svg", status=404, **csrf_headers)
+        res = testapp.get("/diagrams/abcd/image.png", status=404, **csrf_headers)
         assert res.status_code == 404
 
     def test_no_image(self, testapp, csrf_headers):
         diagram_id = create_diagram(
             testapp, csrf_headers
         )  # create a diagram without image
-        testapp.get(f"/diagrams/{diagram_id}/image.svg", status=404)
+        testapp.get(f"/diagrams/{diagram_id}/image.png", status=404)
 
     def test_public_image(self, testapp, csrf_headers, user_factory, diagram):
 
@@ -320,12 +320,12 @@ class TestDiagramImage:
         )
 
         # checking if the owner can access the image
-        testapp.get(f"/diagrams/{diagram['id']}/image.svg", status=200)
+        testapp.get(f"/diagrams/{diagram['id']}/image.png", status=200)
 
         # checking if any user can access the image
         testapp.login(user_factory().email)
-        testapp.get(f"/diagrams/{diagram['id']}/image.svg", status=200)
+        testapp.get(f"/diagrams/{diagram['id']}/image.png", status=200)
 
         # checking not logged in user can access the image
         testapp.logout()
-        testapp.get(f"/diagrams/{diagram['id']}/image.svg", status=200)
+        testapp.get(f"/diagrams/{diagram['id']}/image.png", status=200)
