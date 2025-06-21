@@ -1,7 +1,7 @@
 """
 
 Revision ID: aad18e5848b0
-Revises: 
+Revises:
 Create Date: 2024-12-23 08:10:20.311595
 
 """

@@ -116,11 +116,12 @@
     </nav>
 
     <!-- Masthead-->
-    <header class="masthead">
-      <div class="container px-4 px-lg-5 h-100">
+    <metal:slot metal:define-slot="mainmasthead">
+
+      <header class="masthead">
         <metal:slot metal:define-slot="masthead" />
-      </div>
-    </header>
+      </header>
+    </metal:slot>
 
     <!-- Content-->
     <metal:slot metal:define-slot="content" />

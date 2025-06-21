@@ -1,4 +1,4 @@
-"""Pyramid bootstrap environment. """
+"""Pyramid bootstrap environment."""
 
 import os
 

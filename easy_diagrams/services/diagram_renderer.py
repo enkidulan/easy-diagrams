@@ -15,7 +15,7 @@ class PlantUMLRendererService:
     def __init__(self, settings):
         self.settings = settings
 
-    def render(self, diagram: Diagram) -> Diagram:
+    def render(self, diagram: Diagram) -> bytes:
         return convert(
             diagram.code,
             use_local_plantuml=self.settings.get("use_local_plantuml") == "true",
@@ -25,9 +25,9 @@ class PlantUMLRendererService:
 def convert(puml, use_local_plantuml=False) -> bytes:
 
     if use_local_plantuml:
-        cmd = ["plantuml", "-tsvg", "-p"]
+        cmd = ["plantuml", "-tpng", "-p"]
     else:
-        cmd = ["java", "-jar", "/plantuml/plantuml.jar", "-tsvg", "-p"]
+        cmd = ["java", "-jar", "/plantuml/plantuml.jar", "-tpng", "-p"]
 
     proc = Popen(
         cmd,

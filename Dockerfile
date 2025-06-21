@@ -1,4 +1,4 @@
-FROM enkidulan/plantuml:1.2025.2
+FROM enkidulan/plantuml:1.2025.3
 
 # create a user
 RUN adduser -D app --uid 1000

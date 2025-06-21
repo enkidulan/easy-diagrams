@@ -9,6 +9,7 @@ from pyramid.response import Response
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.view import view_config
 from pyramid.view import view_defaults
+from slugify import slugify
 
 from easy_diagrams import interfaces
 from easy_diagrams.domain.diagram import Diagram
@@ -88,16 +89,25 @@ class DiagramViews(DiagramResourceMixin):
         }
 
     @view_config(
-        route_name="diagram_view_image",
+        route_name="diagram_view_image_png",
         permission=NO_PERMISSION_REQUIRED,
     )
-    def rendered_image(self):
+    def rendered_image_png(self):
+        return self._rendered_image("png")
+
+    @view_config(
+        route_name="diagram_view_image_svg",
+        permission=NO_PERMISSION_REQUIRED,
+    )
+    def rendered_image_svg(self):
+        return self._rendered_image("svg")
+
+    def _rendered_image(self, file_format: str):
         image = self.diagram_repo.get_image_render(self.requested_diagram_id)
         response = Response(body=image)
-        response.content_type = "image/svg+xml"
-        response.headers["Content-Disposition"] = (
-            f"filename={self.requested_diagram_id}.svg"
-        )
+        response.content_type = f"image/{file_format}"
+        name = slugify(self.diagram.title or "image")
+        response.headers["Content-Disposition"] = f"filename={name}.{file_format}"
         return response
 
 

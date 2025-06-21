@@ -37,4 +37,6 @@ def includeme(config: Configurator):
     config.add_route("diagram_view_editor", "/diagrams/{diagram_id}/editor")
     config.add_route("diagram_view_builtin", "/diagrams/{diagram_id}/builtin")
     config.add_route("diagram_view_json", "/diagrams/{diagram_id}/json")
-    config.add_route("diagram_view_image", "/diagrams/{diagram_id}/image.svg")
+    config.add_route("diagram_view_image_png", "/diagrams/{diagram_id}/image.png")
+    # SVG is old deprecated format, now using PNG, but keeping it for compatibility
+    config.add_route("diagram_view_image_svg", "/diagrams/{diagram_id}/image.svg")

@@ -36,7 +36,8 @@ pyramid-services = ">=2.2"
 blake3 = ">=1.0.0"
 pydantic = ">=2.10.3"
 sentry-sdk = {extras = ["sqlalchemy"], version = ">=2.19.2"}
-supervisor = "^4.2.5"
+supervisor = ">=4.2.5"
+python-slugify = ">=8.0.4"
 
 
 
@@ -51,7 +52,7 @@ pytest-mock = ">=3.14.0"
 lxml = ">=5.3.0"
 playwright = ">=1.49.1"
 pytest-playwright = ">=0.6.2"
-pytest-retry = "^1.6.3"
+pytest-retry = ">=1.6.3"
 
 
 [tool.poetry.plugins."paste.app_factory"]

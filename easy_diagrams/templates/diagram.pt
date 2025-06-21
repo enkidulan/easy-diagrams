@@ -1,6 +1,16 @@
 <div metal:use-macro="load: layout.pt">
+
+  <metal metal:fill-slot="mainmasthead">
+    <header class="masthead"
+            style="height: auto; min-height: auto;"
+    >
+      <metal:slot metal:define-slot="masthead" />
+    </header>
+  </metal>
+
+
   <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light"
-       metal:fill-slot="masthead"
+       metal:fill-slot="content"
   >
     <div class="row">
 
@@ -25,118 +35,119 @@
     </div>
 
     <div class="row"
-         style="height: calc(100% - 5rem);"
+         style="height: calc(100% - 1rem);"
     >
-
-      <div class="col-4 h-100 border-end"
-           id="editor"
-           hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
-           hx-indicator="#spinner"
-           hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
-           hx-target="#uml"
-           hx-trigger="keyup changed delay:1s"
-           hx-vals='js:{"code": ace.edit("editor").getValue()}'
-      >${diagram.code}</div>
-
-      <div class="col-8 overflow-auto h-100 border-start"
-           id="uml"
+      <div class="row"
+           style="height: calc(100% - 8rem);"
       >
-        <metal metal:use-macro="load: image.pt"></metal>
+
+        <div class="col-6 border-end"
+             id="editor"
+             hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+             hx-indicator="#spinner"
+             hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+             hx-target="#uml"
+             hx-trigger="keyup changed delay:1s"
+             hx-vals='js:{"code": ace.edit("editor").getValue()}'
+        >${diagram.code}</div>
+
+        <div class="col-6 overflow-auto border-start"
+             id="uml"
+        >
+          <metal metal:use-macro="load: image.pt"></metal>
+        </div>
+
       </div>
 
-    </div>
+      <div class="row"
+           style="height: 8em;"
+      >
 
-    <div class="row align-items-center"
-         style="height: 4rem;"
-    >
-
-      <div class="col-sm">
-        <input class="form-control"
-               id="title"
-               aria-label="Title"
-               hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
-               hx-indicator="#spinner"
-               hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
-               hx-target="#uml"
-               hx-trigger="keyup changed delay:300ms"
-               hx-vals='js:{"title": htmx.find("#title").value}'
-               name="title"
-               placeholder="Title"
-               type="text"
-               value="${diagram.title}"
-        />
-      </div>
-
-      <div class="col-sm-auto">
-        <div class="form-check">
-          <input class="form-check-input"
-                 id="PublicView"
+        <div class="col-sm">
+          <input class="form-control"
+                 id="title"
+                 aria-label="Title"
                  hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
                  hx-indicator="#spinner"
                  hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
                  hx-target="#uml"
-                 hx-trigger="change"
-                 hx-vals='js:{"is_public": htmx.find("#PublicView").checked}'
-                 type="checkbox"
-                 tal:attributes="
-                   checked diagram.is_public;
-                 "
+                 hx-trigger="keyup changed delay:300ms"
+                 hx-vals='js:{"title": htmx.find("#title").value}'
+                 name="title"
+                 placeholder="Title"
+                 type="text"
+                 value="${diagram.title}"
           />
-          <label class="form-check-label"
-                 for="PublicView"
-          >Public view
-          </label>
         </div>
-      </div>
 
-      <div class="col-sm-auto htmx-indicator"
-           id="spinner"
-      >
-        <div class="spinner-border"
-             role="status"
+        <div class="col-sm-auto">
+          <div class="form-check">
+            <input class="form-check-input"
+                   id="PublicView"
+                   hx-headers='{"X-CSRF-Token": "${get_csrf_token()}"}'
+                   hx-indicator="#spinner"
+                   hx-put="${request.route_url('diagram_entity', diagram_id=diagram.id)}"
+                   hx-target="#uml"
+                   hx-trigger="change"
+                   hx-vals='js:{"is_public": htmx.find("#PublicView").checked}'
+                   type="checkbox"
+                   tal:attributes="
+                     checked diagram.is_public;
+                   "
+            />
+            <label class="form-check-label"
+                   for="PublicView"
+            >Public view
+            </label>
+          </div>
+        </div>
+
+        <div class="col-sm-auto htmx-indicator"
+             id="spinner"
         >
-          <span class="visually-hidden">Loading...</span>
+          <div class="spinner-border"
+               role="status"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
-      </div>
-      <div class="col-sm-auto text-center">
-        <button class="btn btn-secondary"
-                hx-on-click="navigator.clipboard.writeText('${request.route_url('diagram_view_builtin', diagram_id=diagram.id)}')"
-                type="button"
-                data-bs-container="body"
-                data-bs-content="Copied to clipboard"
-                data-bs-placement="top"
-                data-bs-toggle="popover"
-                data-bs-trigger="focus"
-        >BuiltIn Editor</button>
-      </div>
+        <div class="col-sm-auto text-center">
+          <button class="btn btn-secondary"
+                  hx-on-click="navigator.clipboard.writeText('${request.route_url('diagram_view_builtin', diagram_id=diagram.id)}')"
+                  type="button"
+                  data-bs-container="body"
+                  data-bs-content="Copied to clipboard"
+                  data-bs-placement="top"
+                  data-bs-toggle="popover"
+                  data-bs-trigger="focus"
+          >BuiltIn Editor</button>
+        </div>
 
-      <div class="col-sm-auto text-center">
-        <button class="btn btn-secondary"
-                hx-on-click="navigator.clipboard.writeText('${request.route_url('diagram_view_image', diagram_id=diagram.id)}')"
-                type="button"
-                data-bs-container="body"
-                data-bs-content="Image remain private unless 'Public view' is checked. The link is copied to clipboard."
-                data-bs-placement="top"
-                data-bs-toggle="popover"
-                data-bs-trigger="focus"
-        >Image</button>
-      </div>
+        <div class="col-sm-auto text-center">
+          <button class="btn btn-secondary"
+                  hx-on-click="navigator.clipboard.writeText('${request.route_url('diagram_view_image_png', diagram_id=diagram.id)}')"
+                  type="button"
+                  data-bs-container="body"
+                  data-bs-content="Image remain private unless 'Public view' is checked. The link is copied to clipboard."
+                  data-bs-placement="top"
+                  data-bs-toggle="popover"
+                  data-bs-trigger="focus"
+          >Image</button>
+        </div>
 
-      <div class="col-sm-auto text-center">
-        <button class="btn btn-secondary"
-                type="button"
-                data-bs-target="#deleteConfirmModal"
-                data-bs-toggle="modal"
-        >Delete</button>
-      </div>
+        <div class="col-sm-auto text-center">
+          <button class="btn btn-secondary"
+                  type="button"
+                  data-bs-target="#deleteConfirmModal"
+                  data-bs-toggle="modal"
+          >Delete</button>
+        </div>
 
+      </div>
     </div>
 
-  </div>
 
-  <metal metal:fill-slot="content"
-         tal:omit-tag=""
-  >
+
     <div class="modal"
          id="deleteConfirmModal"
          tabindex="-1"
@@ -171,8 +182,8 @@
       </div>
     </div>
 
+  </div>
 
-  </metal>
 
 
   <metal metal:fill-slot="scripts"

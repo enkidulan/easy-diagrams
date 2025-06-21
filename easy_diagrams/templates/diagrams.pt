@@ -1,35 +1,37 @@
 <div metal:use-macro="load: layout.pt">
-  <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light"
+  <div class="container px-4 px-lg-5 h-100"
        metal:fill-slot="masthead"
   >
+    <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light">
 
-    <table class="table"
-           id="diagrams"
-    >
-      <thead>
-        <tr>
-          <th scope="col">Short ID</th>
-          <th scope="col">Title</th>
-          <th scope="col">Created at</th>
-          <th scope="col">Updated at</th>
-          <th scope="col">Is public</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr tal:repeat="diagram diagrams_listing">
-          <th scope="row"><a class="link-secondary link-underline-light"
-               href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
-            >${diagram.short_id}</a></th>
-          <td><a class="link-secondary link-underline-light"
-               href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
-            >${diagram.title}</a></td>
-          <td>${diagram.created_at}</td>
-          <td>${diagram.updated_at}</td>
-          <td>${diagram.is_public}</td>
-        </tr>
-      </tbody>
-    </table>
+      <table class="table"
+             id="diagrams"
+      >
+        <thead>
+          <tr>
+            <th scope="col">Short ID</th>
+            <th scope="col">Title</th>
+            <th scope="col">Created at</th>
+            <th scope="col">Updated at</th>
+            <th scope="col">Is public</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr tal:repeat="diagram diagrams_listing">
+            <th scope="row"><a class="link-secondary link-underline-light"
+                 href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
+              >${diagram.short_id}</a></th>
+            <td><a class="link-secondary link-underline-light"
+                 href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
+              >${diagram.title}</a></td>
+            <td>${diagram.created_at}</td>
+            <td>${diagram.updated_at}</td>
+            <td>${diagram.is_public}</td>
+          </tr>
+        </tbody>
+      </table>
 
+    </div>
   </div>
 
   <metal metal:fill-slot="scripts"

@@ -1,29 +1,32 @@
 <div metal:use-macro="load: layout.pt">
-  <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center"
+  <div class="container px-4 px-lg-5 h-100"
        metal:fill-slot="masthead"
   >
-    <div class="col-lg-8 align-self-end">
-      <h1 class="text-white font-weight-bold">
+    <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
+
+      <div class="col-lg-8 align-self-end">
+        <h1 class="text-white font-weight-bold">
                 Embed and share PlantUML diagrams anywhere anytime
-      </h1>
-      <hr class="divider" />
-    </div>
-    <div class="col-lg-8 align-self-baseline">
-      <p class="text-white-75 mb-5">
+        </h1>
+        <hr class="divider" />
+      </div>
+      <div class="col-lg-8 align-self-baseline">
+        <p class="text-white-75 mb-5">
                 Integrate PlantUML seamlessly, and work on your diagrams from any service as if it had supported PlantUML diagrams all along. Don&rsquo;t worry about your diagrams getting out of sync or losing them ever again.
-      </p>
-      <form action="${request.route_url('diagrams')}"
-            method="post"
-      >
-        <input name="csrf_token"
-               type="hidden"
-               value="${get_csrf_token()}"
-        />
-        <button class="btn btn-primary btn-xl"
-                name="create-diagram"
-                type="submit"
-        >Create Diagram</button>
-      </form>
+        </p>
+        <form action="${request.route_url('diagrams')}"
+              method="post"
+        >
+          <input name="csrf_token"
+                 type="hidden"
+                 value="${get_csrf_token()}"
+          />
+          <button class="btn btn-primary btn-xl"
+                  name="create-diagram"
+                  type="submit"
+          >Create Diagram</button>
+        </form>
+      </div>
     </div>
   </div>
 

@@ -1,6 +1,6 @@
 """For setup instruction or design please look at the README.rst. For list of available command run:
 
-    doit list
+doit list
 """
 
 from doit import tools
@@ -82,7 +82,7 @@ def task_serve():
             )
         ],
         "verbosity": 2,
-        "task_dep": ["install"],
+        "task_dep": ["_docker_up", "install"],
         "params": [
             {"name": "params", "short": "p", "default": "--reload"},
         ],
