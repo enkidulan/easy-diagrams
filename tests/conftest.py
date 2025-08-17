@@ -8,6 +8,7 @@ import pytest
 import transaction
 from pyramid.paster import get_appsettings
 from pytest_postgresql.janitor import DatabaseJanitor
+from sqlalchemy import text
 
 import alembic
 import alembic.command
@@ -121,3 +122,20 @@ def dbengine(app_settings, ini_file, request, db_janitor):
 
     Base.metadata.drop_all(bind=engine)
     alembic.command.stamp(alembic_cfg, None, purge=True)
+
+
+@pytest.fixture(autouse=True)
+def db_savepoint(dbengine):
+    """Create a database savepoint before each e2e test and rollback after."""
+    connection = dbengine.connect()
+    trans = connection.begin()
+
+    # Create savepoint
+    connection.execute(text("SAVEPOINT test_savepoint"))
+
+    yield connection
+
+    # Rollback to savepoint
+    connection.execute(text("ROLLBACK TO SAVEPOINT test_savepoint"))
+    trans.rollback()
+    connection.close()

@@ -25,6 +25,7 @@ class Diagram:
     code: str | None
     code_version: int | None = None
     render: DiagramRender | None = None
+    folder_id: str | None = None
 
 
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
@@ -42,6 +43,7 @@ class DiagramListItem:
     is_public: bool
     updated_at: datetime
     created_at: datetime
+    folder_id: str | None = None
 
     @property
     def short_id(self):

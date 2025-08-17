@@ -60,6 +60,10 @@ class DiagramTable(Base):
     user_id = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     user = relationship("User", back_populates="diagrams")
 
+    #: Folder relationship
+    folder_id = mapped_column(ForeignKey("folders.id"), nullable=True, index=True)
+    folder = relationship("FolderTable", back_populates="diagrams")
+
     #: UML code
     _code_version = Column("code_version", BigInteger, nullable=True)
     _code = Column("code", String(10_240), nullable=True)  # 10K characters limit

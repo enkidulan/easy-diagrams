@@ -26,8 +26,8 @@ class DiagramRepository:
     dbsession: object
     diagram_renderer: interfaces.IDiagramRenderer
 
-    def create(self) -> DiagramID:
-        diagram = DiagramTable(user_id=self.user_id)
+    def create(self, folder_id=None) -> DiagramID:
+        diagram = DiagramTable(user_id=self.user_id, folder_id=folder_id)
         self.dbsession.add(diagram)
         self.dbsession.flush()
         return DiagramID(diagram.id)
@@ -57,34 +57,43 @@ class DiagramRepository:
                 if diagram.image
                 else None
             ),
+            folder_id=diagram.folder_id,
         )
 
     def delete(self, diagram_id):
         diagram = self._get(diagram_id)
         self.dbsession.delete(diagram)
 
-    def list(self, offset=0, limit=100) -> list[DiagramListItem]:
+    def list(self, offset=0, limit=100, folder_id=None) -> list[DiagramListItem]:
+        query = self.dbsession.query(
+            DiagramTable.id,
+            DiagramTable.title,
+            DiagramTable.is_public,
+            DiagramTable.created_at,
+            DiagramTable.updated_at,
+        ).filter_by(user_id=self.user_id)
+
+        if folder_id is not None:
+            query = query.filter_by(folder_id=folder_id)
+        else:
+            query = query.filter(DiagramTable.folder_id.is_(None))
 
         return tuple(
             DiagramListItem(**diagram._asdict())
-            for diagram in self.dbsession.query(
-                DiagramTable.id,
-                DiagramTable.title,
-                DiagramTable.is_public,
-                DiagramTable.created_at,
-                DiagramTable.updated_at,
-            )
-            .filter_by(user_id=self.user_id)
+            for diagram in query.add_columns(DiagramTable.folder_id)
             .order_by(DiagramTable.updated_at.desc())
             .limit(limit)
             .offset(offset)
             .all()
         )
 
-    def count(self) -> int:
-        return (
-            self.dbsession.query(DiagramTable).filter_by(user_id=self.user_id).count()
-        )
+    def count(self, folder_id=None) -> int:
+        query = self.dbsession.query(DiagramTable).filter_by(user_id=self.user_id)
+        if folder_id is not None:
+            query = query.filter_by(folder_id=folder_id)
+        else:
+            query = query.filter(DiagramTable.folder_id.is_(None))
+        return query.count()
 
     def edit(self, diagram_id, changes: DiagramEdit) -> None:
         diagram = self._get(diagram_id)

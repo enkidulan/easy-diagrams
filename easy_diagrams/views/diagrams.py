@@ -54,6 +54,10 @@ class DiagramsRepoViewMixin:
     def diagram_repo(self):
         return self.request.find_service(interfaces.IDiagramRepo)
 
+    @functools.cached_property
+    def folder_repo(self):
+        return self.request.find_service(interfaces.IFolderRepo)
+
 
 @view_defaults(route_name="diagrams")
 class Diagrams(DiagramsRepoViewMixin):
@@ -61,34 +65,98 @@ class Diagrams(DiagramsRepoViewMixin):
     @view_config(
         request_method="POST",
     )
-    def create_diagram(self):
-        diagram_id = self.diagram_repo.create()
-        return HTTPSeeOther(
-            location=self.request.route_url(
-                "diagram_view_editor", diagram_id=diagram_id, _query={"new": "true"}
+    def create_item(self):
+        action = self.request.params.get("action")
+
+        if action == "create_diagram":
+            folder_id = self.request.params.get("folder_id") or None
+            diagram_id = self.diagram_repo.create(folder_id=folder_id)
+            return HTTPSeeOther(
+                location=self.request.route_url(
+                    "diagram_view_editor", diagram_id=diagram_id, _query={"new": "true"}
+                )
             )
-        )
+        elif action == "create_folder":
+            name = self.request.params.get("name")
+            parent_id = self.request.params.get("parent_id") or None
+            if not name:
+                raise HTTPBadRequest("Folder name is required")
+            self.folder_repo.create(name=name, parent_id=parent_id)
+            query_params = {"folder_id": parent_id} if parent_id else {}
+            return HTTPSeeOther(
+                location=self.request.route_url("diagrams", _query=query_params)
+            )
+        else:
+            # Default behavior for backward compatibility
+            folder_id = self.request.params.get("folder_id") or None
+            diagram_id = self.diagram_repo.create(folder_id=folder_id)
+            return HTTPSeeOther(
+                location=self.request.route_url(
+                    "diagram_view_editor", diagram_id=diagram_id, _query={"new": "true"}
+                )
+            )
 
     @view_config(
         request_method="GET",
         renderer="easy_diagrams:templates/diagrams.pt",
     )
     def list_diagrams(self):
+        folder_id = self.request.params.get("folder_id") or None
         page = int(self.request.params.get("page", 1))
         limit = int(self.request.registry.settings.get("diagrams.page_size", 10))
         offset = (page - 1) * limit
-        items = self.diagram_repo.list(offset=offset, limit=limit)
-        total = self.diagram_repo.count()
-        num_pages = (total + limit - 1) // limit
+
+        # Get folder and diagram counts
+        folder_count = self.folder_repo.count(parent_id=folder_id)
+        diagram_count = self.diagram_repo.count(folder_id=folder_id)
+        total_items = folder_count + diagram_count
+
+        # Calculate pagination for combined items
+        num_pages = (total_items + limit - 1) // limit if total_items > 0 else 1
+
+        # Determine what to show on current page
+        folders = []
+        diagrams = []
+
+        if offset < folder_count:
+            # Show folders (and possibly diagrams)
+            folder_limit = min(limit, folder_count - offset)
+            folders = self.folder_repo.list(
+                parent_id=folder_id, offset=offset, limit=folder_limit
+            )
+
+            remaining_slots = limit - len(folders)
+            if remaining_slots > 0:
+                # Fill remaining slots with diagrams
+                diagrams = self.diagram_repo.list(
+                    offset=0, limit=remaining_slots, folder_id=folder_id
+                )
+        else:
+            # Show only diagrams
+            diagram_offset = offset - folder_count
+            diagrams = self.diagram_repo.list(
+                offset=diagram_offset, limit=limit, folder_id=folder_id
+            )
+
         page_listing = PageListing(
-            items=items,
-            total=total,
+            items=diagrams,
+            total=total_items,
             limit=limit,
             offset=offset,
             current_page=page,
             num_pages=num_pages,
         )
-        return {"page_listing": page_listing}
+
+        current_folder = None
+        if folder_id:
+            current_folder = self.folder_repo.get(folder_id)
+
+        return {
+            "page_listing": page_listing,
+            "folders": folders,
+            "current_folder": current_folder,
+            "folder_id": folder_id,
+        }
 
 
 class DiagramResourceMixin(DiagramsRepoViewMixin):

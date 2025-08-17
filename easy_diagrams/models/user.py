@@ -39,3 +39,6 @@ class User(Base):
 
     #: User's diagrams
     diagrams = relationship("DiagramTable", back_populates="user")
+
+    #: User's folders
+    folders = relationship("FolderTable", back_populates="user")

@@ -18,7 +18,9 @@ def csrf_headers_fixture(testapp):
 
 
 def create_diagram(testapp, csrf_headers):
-    return testapp.post("/diagrams", status=303, **csrf_headers).location.split("/")[-2]
+    return testapp.post(
+        "/diagrams", params={"action": "create_diagram"}, status=303, **csrf_headers
+    ).location.split("/")[-2]
 
 
 @pytest.fixture(name="diagram")
@@ -64,17 +66,29 @@ class TestDiagramList:
     def test_empty_list(self, testapp):
         testapp.login()
         res = testapp.get("/diagrams", status=200)
-        assert not res.lxml.xpath("//table[@id='diagrams']/tbody/tr/th/a/@href")
+        # Check for diagram links (not folder links)
+        diagram_links = res.lxml.xpath(
+            "//table[@id='diagrams']/tbody/tr/td/a[contains(@href, '/editor')]/@href"
+        )
+        assert not diagram_links
 
     def test_list(self, testapp, csrf_headers, request_host):
         testapp.login()
 
         # create two diagrams
         for _ in range(2):
-            testapp.post("/diagrams", status=303, **csrf_headers)
+            testapp.post(
+                "/diagrams",
+                params={"action": "create_diagram"},
+                status=303,
+                **csrf_headers,
+            )
 
         res = testapp.get("/diagrams", status=200)
-        listed_diagrams = res.lxml.xpath("//table[@id='diagrams']/tbody/tr/th/a/@href")
+        # Look for diagram links specifically (not folder links)
+        listed_diagrams = res.lxml.xpath(
+            "//table[@id='diagrams']/tbody/tr/td/a[contains(@href, '/editor')]/@href"
+        )
         assert len(listed_diagrams) == 2
         for diagram_link in listed_diagrams:
             # checking if the link is valid
@@ -90,11 +104,19 @@ class TestDiagramList:
 
         # create 11 diagrams to trigger pagination (page size is 10)
         for _ in range(11):
-            testapp.post("/diagrams", status=303, **csrf_headers)
+            testapp.post(
+                "/diagrams",
+                params={"action": "create_diagram"},
+                status=303,
+                **csrf_headers,
+            )
 
         # 1. Check first page
         res = testapp.get("/diagrams", status=200)
-        listed_diagrams = res.lxml.xpath("//table[@id='diagrams']/tbody/tr")
+        # Count only diagram rows (those with document icon)
+        listed_diagrams = res.lxml.xpath(
+            "//table[@id='diagrams']/tbody/tr[td[1][text()='📄']]"
+        )
         assert len(listed_diagrams) == 10
 
         # Check pagination controls on page 1
@@ -111,7 +133,10 @@ class TestDiagramList:
 
         # 2. Go to next page
         res = testapp.get(next_link.get("href"), status=200)
-        listed_diagrams = res.lxml.xpath("//table[@id='diagrams']/tbody/tr")
+        # Count only diagram rows
+        listed_diagrams = res.lxml.xpath(
+            "//table[@id='diagrams']/tbody/tr[td[1][text()='📄']]"
+        )
         assert len(listed_diagrams) == 1
 
         # Check pagination controls on page 2

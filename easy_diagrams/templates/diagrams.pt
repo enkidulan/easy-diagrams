@@ -3,66 +3,140 @@
        metal:fill-slot="masthead"
   >
     <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light">
+      <div class="col-12">
+        <h2 class="mb-4">My Diagrams</h2>
 
-      <table class="table"
-             id="diagrams"
-      >
-        <thead class="thead-light">
-          <tr>
-            <th scope="col">Short ID</th>
-            <th scope="col">Title</th>
-            <th scope="col">Created at</th>
-            <th scope="col">Updated at</th>
-            <th scope="col">Is public</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr tal:repeat="diagram page_listing.items">
-            <th scope="row"><a class="link-secondary link-underline-light"
-                 href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
-              >${diagram.short_id}</a></th>
-            <td><a class="link-secondary link-underline-light"
-                 href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
-              >${diagram.title}</a></td>
-            <td>${diagram.created_at}</td>
-            <td>${diagram.updated_at}</td>
-            <td>${diagram.is_public}</td>
-          </tr>
-        </tbody>
+        <!-- Breadcrumb navigation -->
+        <nav class="mb-3"
+             aria-label="breadcrumb"
+             tal:condition="current_folder"
+        >
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="${request.route_url('diagrams')}">Root</a></li>
+            <li class="breadcrumb-item active"
+                aria-current="page"
+            >${current_folder.name}</li>
+          </ol>
+        </nav>
 
-      </table>
-      <nav aria-label="Diagrams pagination">
-        <ul class="pagination">
-          <li class="page-item"
-              tal:attributes="
-                class python: 'page-item disabled' if page_listing.current_page == 1 else 'page-item';
-              "
+        <!-- Create buttons -->
+        <div class="mb-4">
+          <form method="post"
+                style="display: inline-block; margin-right: 10px;"
           >
-            <a class="page-link"
-               href="${request.route_url('diagrams', _query=dict(page=page_listing.previous_page))}"
-            >Previous</a>
-          </li>
-          <li class="page-item disabled">
-            <a class="page-link">Page
-              <span tal:content="page_listing.current_page">1</span>
-               of
-              <span tal:content="page_listing.num_pages">1</span></a>
-          </li>
-          <li class="page-item"
-              tal:condition="python: page_listing.has_next"
-          ><a class="page-link"
-               href="${request.route_url('diagrams', _query=dict(page=page_listing.next_page))}"
-            >Next</a></li>
-        </ul>
-      </nav>
+            <input name="action"
+                   type="hidden"
+                   value="create_diagram"
+            />
+            <input name="csrf_token"
+                   type="hidden"
+                   value="${get_csrf_token()}"
+            />
+            <input name="folder_id"
+                   type="hidden"
+                   value="${folder_id or ''}"
+            />
+            <button class="btn btn-primary"
+                    type="submit"
+            >Create Diagram</button>
+          </form>
+          <form method="post"
+                style="display: inline-block;"
+          >
+            <input name="action"
+                   type="hidden"
+                   value="create_folder"
+            />
+            <input name="parent_id"
+                   type="hidden"
+                   value="${folder_id or ''}"
+            />
+            <input name="csrf_token"
+                   type="hidden"
+                   value="${get_csrf_token()}"
+            />
+            <input class="form-control"
+                   name="name"
+                   placeholder="Folder name"
+                   required
+                   style="display: inline-block; width: 200px; margin-right: 10px;"
+                   type="text"
+            />
+            <button class="btn btn-secondary"
+                    type="submit"
+            >Create Folder</button>
+          </form>
+        </div>
 
+        <table class="table table-striped"
+               id="diagrams"
+        >
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">Type</th>
+              <th scope="col">Name/Title</th>
+              <th scope="col">Created at</th>
+              <th scope="col">Updated at</th>
+              <th scope="col">Is public</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Folders -->
+            <tr tal:repeat="folder folders">
+              <td>📁</td>
+              <td><a class="link-secondary link-underline-light"
+                   href="${request.route_url('diagrams', _query={'folder_id': folder.id})}"
+                >${folder.name}</a></td>
+              <td>${folder.created_at}</td>
+              <td>${folder.updated_at}</td>
+              <td>-</td>
+            </tr>
+            <!-- Diagrams -->
+            <tr tal:repeat="diagram page_listing.items">
+              <td>📄</td>
+              <td><a class="link-secondary link-underline-light"
+                   href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
+                >${diagram.title or diagram.short_id}</a></td>
+              <td>${diagram.created_at}</td>
+              <td>${diagram.updated_at}</td>
+              <td>${diagram.is_public}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <nav aria-label="Diagrams pagination">
+          <ul class="pagination justify-content-center">
+            <li class="page-item"
+                tal:attributes="
+                  class python: 'page-item disabled' if page_listing.current_page == 1 else 'page-item';
+                "
+            >
+              <a class="page-link"
+                 href="${request.route_url('diagrams', _query=dict(page=page_listing.previous_page) if not folder_id else dict(page=page_listing.previous_page, folder_id=folder_id))}"
+                 tal:condition="python: page_listing.current_page > 1"
+              >Previous</a>
+              <span class="page-link"
+                    tal:condition="python: page_listing.current_page == 1"
+              >Previous</span>
+            </li>
+            <li class="page-item disabled">
+              <a class="page-link">Page ${page_listing.current_page} of ${page_listing.num_pages}</a>
+            </li>
+            <li class="page-item"
+                tal:condition="python: page_listing.has_next"
+            ><a class="page-link"
+                 href="${request.route_url('diagrams', _query=dict(page=page_listing.next_page) if not folder_id else dict(page=page_listing.next_page, folder_id=folder_id))}"
+              >Next</a></li>
+          </ul>
+        </nav>
+
+      </div>
     </div>
   </div>
 
   <metal metal:fill-slot="scripts"
          tal:omit-tag=""
   >
-
   </metal>
 
 </div>
