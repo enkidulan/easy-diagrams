@@ -16,6 +16,36 @@ from easy_diagrams.domain.diagram import DiagramEdit
 
 
 @dataclass
+class PageListing:
+    items: list
+    total: int
+    limit: int
+    offset: int
+    current_page: int
+    num_pages: int
+
+    @property
+    def has_next(self) -> bool:
+        return self.current_page < self.num_pages
+
+    @property
+    def next_page(self) -> int | None:
+        if self.has_next:
+            return self.current_page + 1
+        return None
+
+    @property
+    def has_previous(self) -> bool:
+        return self.current_page > 1
+
+    @property
+    def previous_page(self) -> int | None:
+        if self.has_previous:
+            return self.current_page - 1
+        return None
+
+
+@dataclass
 class DiagramsRepoViewMixin:
 
     request: Request
@@ -44,7 +74,21 @@ class Diagrams(DiagramsRepoViewMixin):
         renderer="easy_diagrams:templates/diagrams.pt",
     )
     def list_diagrams(self):
-        return {"diagrams_listing": self.diagram_repo.list()}
+        page = int(self.request.params.get("page", 1))
+        limit = int(self.request.registry.settings.get("diagrams.page_size", 10))
+        offset = (page - 1) * limit
+        items = self.diagram_repo.list(offset=offset, limit=limit)
+        total = self.diagram_repo.count()
+        num_pages = (total + limit - 1) // limit
+        page_listing = PageListing(
+            items=items,
+            total=total,
+            limit=limit,
+            offset=offset,
+            current_page=page,
+            num_pages=num_pages,
+        )
+        return {"page_listing": page_listing}
 
 
 class DiagramResourceMixin(DiagramsRepoViewMixin):

@@ -64,6 +64,7 @@ class DiagramRepository:
         self.dbsession.delete(diagram)
 
     def list(self, offset=0, limit=100) -> list[DiagramListItem]:
+
         return tuple(
             DiagramListItem(**diagram._asdict())
             for diagram in self.dbsession.query(
@@ -78,6 +79,11 @@ class DiagramRepository:
             .limit(limit)
             .offset(offset)
             .all()
+        )
+
+    def count(self) -> int:
+        return (
+            self.dbsession.query(DiagramTable).filter_by(user_id=self.user_id).count()
         )
 
     def edit(self, diagram_id, changes: DiagramEdit) -> None:

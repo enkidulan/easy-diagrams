@@ -85,6 +85,46 @@ class TestDiagramList:
             # checking if the link is accessible
             testapp.get(diagram_link, status=200)
 
+    def test_pagination(self, testapp, csrf_headers):
+        testapp.login()
+
+        # create 11 diagrams to trigger pagination (page size is 10)
+        for _ in range(11):
+            testapp.post("/diagrams", status=303, **csrf_headers)
+
+        # 1. Check first page
+        res = testapp.get("/diagrams", status=200)
+        listed_diagrams = res.lxml.xpath("//table[@id='diagrams']/tbody/tr")
+        assert len(listed_diagrams) == 10
+
+        # Check pagination controls on page 1
+        pagination = res.lxml.xpath("//nav[@aria-label='Diagrams pagination']")[0]
+        assert "Page 1 of 2" in " ".join(pagination.text_content().split())
+
+        # Previous link should be disabled
+        previous_link_li = pagination.xpath("ul/li[1]")[0]
+        assert "disabled" in previous_link_li.get("class")
+
+        # Next link should be enabled and present
+        next_link = pagination.xpath("ul/li/a[text()='Next']")[0]
+        assert "disabled" not in next_link.getparent().get("class", "")
+
+        # 2. Go to next page
+        res = testapp.get(next_link.get("href"), status=200)
+        listed_diagrams = res.lxml.xpath("//table[@id='diagrams']/tbody/tr")
+        assert len(listed_diagrams) == 1
+
+        # Check pagination controls on page 2
+        pagination = res.lxml.xpath("//nav[@aria-label='Diagrams pagination']")[0]
+        assert "Page 2 of 2" in " ".join(pagination.text_content().split())
+
+        # Previous link should be enabled
+        previous_link = pagination.xpath("ul/li/a[text()='Previous']")[0]
+        assert "disabled" not in previous_link.getparent().get("class")
+
+        # Next link should not be present
+        assert not pagination.xpath("ul/li/a[text()='Next']")
+
 
 class TestDiagramResourceDelete:
     """Tests for the diagram resource delete view."""
