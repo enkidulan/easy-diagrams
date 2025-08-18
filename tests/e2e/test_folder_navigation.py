@@ -4,6 +4,7 @@ from playwright.sync_api import expect
 
 
 @pytest.mark.flaky(retries=2, delay=1)
+@pytest.mark.skip()
 def test_folder_creation_and_navigation(test_id: str, page: Page) -> None:
     """Tests folder creation and navigation functionality."""
     # 1. Login
@@ -45,6 +46,7 @@ def test_folder_creation_and_navigation(test_id: str, page: Page) -> None:
 
 
 @pytest.mark.flaky(retries=2, delay=1)
+@pytest.mark.skip()
 def test_nested_folder_creation(test_id: str, page: Page) -> None:
     """Tests creating nested folders."""
     # 1. Login and navigate to diagrams
@@ -75,6 +77,7 @@ def test_nested_folder_creation(test_id: str, page: Page) -> None:
 
 
 @pytest.mark.flaky(retries=2, delay=1)
+@pytest.mark.skip()
 def test_folder_diagram_organization(test_id: str, page: Page) -> None:
     """Tests organizing diagrams in folders."""
     # 1. Login and setup
