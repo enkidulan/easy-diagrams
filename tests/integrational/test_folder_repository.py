@@ -8,17 +8,17 @@ from easy_diagrams.services.folder_repo import FolderRepository
 class TestFolderRepository:
 
     def test_create_folder(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
         folder_id = repo.create("Test Folder")
 
         assert folder_id is not None
         folder = repo.get(folder_id)
         assert folder.name == "Test Folder"
         assert folder.parent_id is None
-        assert folder.user_id == user.id
+        assert folder.organization_id == user.organization_id
 
     def test_create_nested_folder(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
         parent_id = repo.create("Parent Folder")
         child_id = repo.create("Child Folder", parent_id=parent_id)
 
@@ -27,7 +27,7 @@ class TestFolderRepository:
         assert child.parent_id == parent_id
 
     def test_list_folders(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
         _ = repo.create("Folder 1")
         _ = repo.create("Folder 2")
 
@@ -38,7 +38,7 @@ class TestFolderRepository:
         assert "Folder 2" in folder_names
 
     def test_list_nested_folders(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
         parent_id = repo.create("Parent")
         _ = repo.create("Child 1", parent_id=parent_id)
         _ = repo.create("Child 2", parent_id=parent_id)
@@ -56,7 +56,7 @@ class TestFolderRepository:
         assert "Child 2" in child_names
 
     def test_edit_folder(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
         folder_id = repo.create("Original Name")
 
         changes = FolderEdit(name="New Name")
@@ -65,7 +65,7 @@ class TestFolderRepository:
         assert updated_folder.name == "New Name"
 
     def test_delete_folder(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
         folder_id = repo.create("To Delete")
 
         repo.delete(folder_id)
@@ -74,15 +74,15 @@ class TestFolderRepository:
             repo.get(folder_id)
 
     def test_get_nonexistent_folder(self, dbsession, user):
-        repo = FolderRepository(user.id, dbsession)
+        repo = FolderRepository(user.organization_id, dbsession)
 
         with pytest.raises(DiagramNotFoundError):
             repo.get("nonexistent")
 
     def test_user_isolation(self, dbsession, user, user_factory):
-        repo1 = FolderRepository(user.id, dbsession)
+        repo1 = FolderRepository(user.organization_id, dbsession)
         other_user = user_factory()
-        repo2 = FolderRepository(other_user.id, dbsession)
+        repo2 = FolderRepository(other_user.organization_id, dbsession)
 
         folder_id = repo1.create("User 1 Folder")
 

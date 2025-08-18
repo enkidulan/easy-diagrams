@@ -22,32 +22,46 @@ class DiagramRepository:
     test the database layer in isolation and use fake it in other layers.
     """
 
-    user_id: str
+    organization_id: str
     dbsession: object
     diagram_renderer: interfaces.IDiagramRenderer
 
     def create(self, folder_id=None) -> DiagramID:
-        diagram = DiagramTable(user_id=self.user_id, folder_id=folder_id)
+        if not self.organization_id:
+            raise DiagramNotFoundError("Authentication required to create diagrams.")
+        diagram = DiagramTable(
+            organization_id=self.organization_id, folder_id=folder_id
+        )
         self.dbsession.add(diagram)
         self.dbsession.flush()
         return DiagramID(diagram.id)
 
     def _get(self, diagram_id) -> DiagramTable:
         try:
-            diagram = (
-                self.dbsession.query(DiagramTable)
-                .filter_by(id=diagram_id, user_id=self.user_id)
-                .one()
-            )
+            if self.organization_id:
+                diagram = (
+                    self.dbsession.query(DiagramTable)
+                    .filter_by(id=diagram_id, organization_id=self.organization_id)
+                    .one()
+                )
+            else:
+                # For unauthenticated users, don't filter by organization_id
+                # Access control will be handled in the calling method
+                diagram = (
+                    self.dbsession.query(DiagramTable).filter_by(id=diagram_id).one()
+                )
         except sqlalchemy_exc.NoResultFound:
             raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
         return diagram
 
     def get(self, diagram_id) -> Diagram:
         diagram = self._get(diagram_id)
+        # For authenticated operations, ensure user owns the diagram
+        if self.organization_id and diagram.organization_id != self.organization_id:
+            raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
         return Diagram(
             id=DiagramID(diagram.id),
-            user_id=diagram.user_id,
+            organization_id=diagram.organization_id,
             title=diagram.title,
             is_public=diagram.is_public,
             code=diagram.code,
@@ -62,16 +76,21 @@ class DiagramRepository:
 
     def delete(self, diagram_id):
         diagram = self._get(diagram_id)
+        # Ensure user owns the diagram
+        if not self.organization_id or diagram.organization_id != self.organization_id:
+            raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
         self.dbsession.delete(diagram)
 
     def list(self, offset=0, limit=100, folder_id=None) -> list[DiagramListItem]:
+        if not self.organization_id:
+            return []  # Return empty list for unauthenticated users
         query = self.dbsession.query(
             DiagramTable.id,
             DiagramTable.title,
             DiagramTable.is_public,
             DiagramTable.created_at,
             DiagramTable.updated_at,
-        ).filter_by(user_id=self.user_id)
+        ).filter_by(organization_id=self.organization_id)
 
         if folder_id is not None:
             query = query.filter_by(folder_id=folder_id)
@@ -88,7 +107,11 @@ class DiagramRepository:
         )
 
     def count(self, folder_id=None) -> int:
-        query = self.dbsession.query(DiagramTable).filter_by(user_id=self.user_id)
+        if not self.organization_id:
+            return 0  # Return 0 for unauthenticated users
+        query = self.dbsession.query(DiagramTable).filter_by(
+            organization_id=self.organization_id
+        )
         if folder_id is not None:
             query = query.filter_by(folder_id=folder_id)
         else:
@@ -97,6 +120,9 @@ class DiagramRepository:
 
     def edit(self, diagram_id, changes: DiagramEdit) -> None:
         diagram = self._get(diagram_id)
+        # Ensure user owns the diagram
+        if not self.organization_id or diagram.organization_id != self.organization_id:
+            raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
         if changes.title is not None:
             diagram.title = changes.title
         if changes.is_public is not None:
@@ -112,7 +138,15 @@ class DiagramRepository:
             diagram = self.dbsession.query(DiagramTable).filter_by(id=diagram_id).one()
         except sqlalchemy_exc.NoResultFound:
             raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
-        if diagram.user_id != self.user_id and not diagram.is_public:
+        # Allow access if user owns the diagram or if diagram is public
+        if self.organization_id and diagram.organization_id == self.organization_id:
+            # User owns the diagram
+            pass
+        elif diagram.is_public:
+            # Diagram is public
+            pass
+        else:
+            # User doesn't own diagram and it's not public
             raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
         if not diagram.image:
             raise DiagramNotFoundError(f"Diagram {diagram_id} has no image.")
@@ -120,10 +154,19 @@ class DiagramRepository:
 
 
 def factory(context, request: Request):
+    from easy_diagrams.models.organization import organization_users
+
     diagram_renderer = request.find_service(interfaces.IDiagramRenderer)
-    return DiagramRepository(
-        request.authenticated_userid, request.dbsession, diagram_renderer
-    )
+    # Get user's organization_id from association table
+    organization_id = None
+    if request.authenticated_userid:
+        result = (
+            request.dbsession.query(organization_users.c.organization_id)
+            .filter_by(user_id=request.authenticated_userid)
+            .first()
+        )
+        organization_id = result.organization_id if result else None
+    return DiagramRepository(organization_id, request.dbsession, diagram_renderer)
 
 
 def includeme(config):

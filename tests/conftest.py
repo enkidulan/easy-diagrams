@@ -105,6 +105,7 @@ def dbengine(app_settings, ini_file, request, db_janitor):
 
     engine = models.get_engine(app_settings)
     alembic_cfg = alembic.config.Config(ini_file)
+    alembic_cfg.set_main_option("sqlalchemy.url", app_settings["sqlalchemy.url"])
 
     Base.metadata.drop_all(bind=engine)
     alembic.command.stamp(alembic_cfg, None, purge=True)

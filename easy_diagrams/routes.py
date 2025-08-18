@@ -31,6 +31,8 @@ def includeme(config: Configurator):
     config.add_route("login", "/login")
     config.add_route("logout", "/logout")
     config.add_route("social_login", "/social_login/{provider_name}")
+    # organizations
+    config.add_route("organization_edit", "/organization/edit")
     # diagrams
     config.add_route("diagrams", "/diagrams")
     config.add_route("diagram_entity", "/diagrams/{diagram_id}")

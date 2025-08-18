@@ -24,11 +24,18 @@ def social_login_view(request):
     # TODO: move to service
     user = dbsession.query(models.User).filter_by(email=user_email).first()
     if user is None:
+        # Create organization first
+        org_repo = request.find_service(interfaces.IOrganizationRepo)
+
+        # Create user
         user = models.User(email=user_email)
         dbsession.add(user)
-        dbsession.flush()
+        dbsession.flush()  # Get user ID
+
+        # Create organization and make user owner
+        _ = org_repo.create_for_user(user_email, user.id)
     else:
-        user.last_login = datetime.now()
+        user.last_login_at = datetime.now()
     new_csrf_token(request)
     headers = remember(request, user.id)
     return HTTPSeeOther(location=next_url, headers=headers)

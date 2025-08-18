@@ -36,9 +36,11 @@ class FolderTable(Base):
         DateTime, index=True, onupdate=datetime.now, default=datetime.now
     )
 
-    #: User relationship
-    user_id = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    user = relationship("User", back_populates="folders")
+    #: Organization relationship
+    organization_id = mapped_column(
+        ForeignKey("organizations.id"), nullable=False, index=True
+    )
+    organization = relationship("OrganizationTable", back_populates="folders")
 
     #: Parent folder relationship (for nested folders)
     parent_id = mapped_column(ForeignKey("folders.id"), nullable=True, index=True)

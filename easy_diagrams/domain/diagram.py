@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Annotated
 from typing import NewType
-from uuid import UUID
 
 from pydantic import ConfigDict
 from pydantic import StringConstraints
@@ -19,7 +18,7 @@ class DiagramRender:
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
 class Diagram:
     id: DiagramID
-    user_id: UUID
+    organization_id: str
     title: str | None
     is_public: bool
     code: str | None

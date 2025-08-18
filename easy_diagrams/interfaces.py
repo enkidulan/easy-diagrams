@@ -11,6 +11,9 @@ if TYPE_CHECKING:
     from easy_diagrams.domain.folder import FolderEdit
     from easy_diagrams.domain.folder import FolderID
     from easy_diagrams.domain.folder import FolderListItem
+    from easy_diagrams.domain.organization import Organization
+    from easy_diagrams.domain.organization import OrganizationID
+    from easy_diagrams.domain.organization import OrganizationListItem
 
 
 class ISocialLoginProvider(Interface):
@@ -33,8 +36,12 @@ class IDiagramRenderer(Interface):
 class IDiagramRepo(Interface):
     """Interface for Diagram repository."""
 
-    def __init__(user_id: str, dbsession: object, diagram_renderer: IDiagramRenderer):
-        """Initialize repository with user_id, dbsession and diagram_renderer."""
+    def __init__(
+        organization_id: "OrganizationID",
+        dbsession: object,
+        diagram_renderer: IDiagramRenderer,
+    ):
+        """Initialize repository with organization_id, dbsession and diagram_renderer."""
 
     def create(folder_id: "FolderID" = None) -> "DiagramID":
         """Create new diagram and return its ID."""
@@ -77,3 +84,22 @@ class IFolderRepo(Interface):
 
     def edit(folder_id: "FolderID", changes: "FolderEdit") -> "Folder":
         """Edit folder by its ID."""
+
+
+class IOrganizationRepo(Interface):
+    """Interface for Organization repository."""
+
+    def get(organization_id: "OrganizationID") -> "Organization":
+        """Get organization by its ID."""
+
+    def list() -> list["OrganizationListItem"]:
+        """List all organizations."""
+
+    def get_by_user(user_id) -> "Organization":
+        """Get organization by user ID."""
+
+    def update_name(organization_id: "OrganizationID", name: str) -> None:
+        """Update organization name."""
+
+    def create_for_user(user_email: str, user_id) -> "OrganizationID":
+        """Create organization for user and make them an owner."""

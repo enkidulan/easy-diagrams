@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import NewType
-from uuid import UUID
 
 from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
@@ -11,7 +10,7 @@ FolderID = NewType("FolderID", str)
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
 class Folder:
     id: FolderID
-    user_id: UUID
+    organization_id: str
     name: str
     parent_id: FolderID | None = None
 
