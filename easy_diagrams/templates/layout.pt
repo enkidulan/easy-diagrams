@@ -90,6 +90,11 @@
             ><a class="nav-link"
                  href="${request.route_url('diagrams')}"
               >My Diagrams</a></li>
+            <li class="nav-item"
+                tal:condition="request.is_authenticated"
+            ><a class="nav-link"
+                 href="${request.route_url('organizations')}"
+              >Organizations</a></li>
             <li class="nav-item">
               <a class="nav-link"
                  href="${request.application_url}/login"

@@ -40,3 +40,10 @@ def includeme(config: Configurator):
     config.add_route("diagram_view_image_png", "/diagrams/{diagram_id}/image.png")
     # SVG is old deprecated format, now using PNG, but keeping it for compatibility
     config.add_route("diagram_view_image_svg", "/diagrams/{diagram_id}/image.svg")
+    # organizations
+    config.add_route("organizations", "/organizations")
+    config.add_route("organization_entity", "/organizations/{organization_id}")
+    config.add_route("organization_users", "/organizations/{organization_id}/users")
+    config.add_route(
+        "organization_user_entity", "/organizations/{organization_id}/users/{user_id}"
+    )

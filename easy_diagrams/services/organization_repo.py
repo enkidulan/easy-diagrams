@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from pyramid.request import Request
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from zope.interface import implementer
@@ -18,8 +19,8 @@ from easy_diagrams.models.user import User
 class OrganizationRepo:
     """Organization repository implementation."""
 
-    def __init__(self, user_id: str, dbsession: Session):
-        self.user_id = UUID(user_id)
+    def __init__(self, user_id: UUID, dbsession: Session):
+        self.user_id = user_id
         self.dbsession = dbsession
 
     def create(self, name: str) -> OrganizationID:
@@ -203,21 +204,33 @@ class OrganizationRepo:
 
     def list_users(
         self, organization_id: OrganizationID, offset: int = 0, limit: int = 20
-    ) -> "list[str]":
+    ) -> "list[dict]":
         """List users in an organization with pagination."""
         # Verify organization exists and user has access
         self._get_user_organization(organization_id.value)
 
-        users = self.dbsession.execute(
-            organization_user_association.select()
-            .where(
+        users = (
+            self.dbsession.query(User, organization_user_association.c.is_owner)
+            .join(
+                organization_user_association,
+                User.id == organization_user_association.c.user_id,
+            )
+            .filter(
                 organization_user_association.c.organization_id == organization_id.value
             )
             .offset(offset)
             .limit(limit)
-        ).fetchall()
+            .all()
+        )
 
-        return [str(user.user_id) for user in users]
+        return [
+            {
+                "id": str(user.id),
+                "email": user.email,
+                "is_owner": is_owner,
+            }
+            for user, is_owner in users
+        ]
 
     def _get_user_organization(self, organization_id: UUID) -> OrganizationTable:
         """Get organization that user has access to."""
@@ -239,3 +252,11 @@ class OrganizationRepo:
             )
 
         return org
+
+
+def factory(context, request: Request):
+    return OrganizationRepo(request.authenticated_userid, request.dbsession)
+
+
+def includeme(config):
+    config.register_service_factory(factory, IOrganizationRepo)
