@@ -2,7 +2,7 @@ default_language_version:
   python: python3
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-ast
       - id: check-builtin-literals
@@ -27,14 +27,14 @@ repos:
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
-  rev: v0.12.0
+  rev: v0.12.10
   hooks:
     - id: ruff
       types_or: [ python, pyi ]
       args: [ --fix ]
 
 - repo: https://github.com/collective/zpretty
-  rev: 3.1.0
+  rev: 3.1.1
   hooks:
     - id: zpretty
 
