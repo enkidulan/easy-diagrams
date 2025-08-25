@@ -19,7 +19,7 @@ class DiagramRender:
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
 class Diagram:
     id: DiagramID
-    user_id: UUID
+    organization_id: UUID
     title: str | None
     is_public: bool
     code: str | None

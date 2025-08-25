@@ -11,6 +11,10 @@ if TYPE_CHECKING:
     from easy_diagrams.domain.folder import FolderEdit
     from easy_diagrams.domain.folder import FolderID
     from easy_diagrams.domain.folder import FolderListItem
+    from easy_diagrams.domain.organization import Organization
+    from easy_diagrams.domain.organization import OrganizationEdit
+    from easy_diagrams.domain.organization import OrganizationID
+    from easy_diagrams.domain.organization import OrganizationListItem
 
 
 class ISocialLoginProvider(Interface):
@@ -77,3 +81,48 @@ class IFolderRepo(Interface):
 
     def edit(folder_id: "FolderID", changes: "FolderEdit") -> "Folder":
         """Edit folder by its ID."""
+
+
+class IOrganizationRepo(Interface):
+    """Interface for Organization repository."""
+
+    def create(name: str) -> "OrganizationID":
+        """Create new organization and return its ID."""
+
+    def get(organization_id: "OrganizationID") -> "Organization":
+        """Get organization by its ID."""
+
+    def delete(organization_id: "OrganizationID") -> None:
+        """Delete organization by its ID."""
+
+    def list(offset: int = 0, limit: int = 20) -> list["OrganizationListItem"]:
+        """List user's organizations with pagination."""
+
+    def list_users(
+        organization_id: "OrganizationID", offset: int = 0, limit: int = 20
+    ) -> "list[str]":
+        """List users in an organization with pagination."""
+
+    def edit(
+        organization_id: "OrganizationID", changes: "OrganizationEdit"
+    ) -> "Organization":
+        """Edit organization by its ID."""
+
+    def add_user(
+        organization_id: "OrganizationID", email: str, is_owner: bool = False
+    ) -> None:
+        """Add user to organization by email. Creates user if doesn't exist."""
+
+    def remove_user(organization_id: "OrganizationID", user_id: str) -> None:
+        """Remove user from organization."""
+
+    def make_owner(organization_id: "OrganizationID", user_id: str) -> None:
+        """Make user an owner of the organization."""
+
+    def remove_owner(organization_id: "OrganizationID", user_id: str) -> None:
+        """Remove user from owners. Fails if user is the only owner."""
+
+    def get_owners(
+        organization_id: "OrganizationID", offset: int = 0, limit: int = 20
+    ) -> "list[str]":
+        """Get paginated list of owner user IDs for the organization."""

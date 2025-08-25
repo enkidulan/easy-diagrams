@@ -1,0 +1,57 @@
+<div metal:use-macro="load: layout.pt">
+  <div class="container px-4 px-lg-5 h-100"
+       metal:fill-slot="masthead"
+  >
+    <div class="row gx-4 gx-lg-5 h-100 align-items-center justify-content-center text-center">
+      <div class="col-lg-8 align-self-end">
+        <h1 class="text-white font-weight-bold">Select Organization</h1>
+        <hr class="divider" />
+      </div>
+      <div class="col-lg-8 align-self-baseline">
+        <p class="text-white-75 mb-5">You belong to multiple organizations. Please select which one you'd like to work with.</p>
+
+        <form action="${request.route_url('select_organization')}"
+              method="post"
+        >
+          <input name="csrf_token"
+                 type="hidden"
+                 value="${get_csrf_token()}"
+          />
+          <input name="next"
+                 type="hidden"
+                 value="${next_url}"
+          />
+
+          <div class="mb-4">
+            <div class="mb-3"
+                 tal:repeat="org organizations"
+            >
+              <div class="form-check text-start">
+                <input class="form-check-input"
+                       name="organization_id"
+                       required
+                       type="radio"
+                       tal:attributes="
+                         value org.id.value;
+                         id string:org_${org.id.value};
+                       "
+                />
+                <label class="form-check-label text-white"
+                       tal:attributes="
+                         for string:org_${org.id.value};
+                       "
+                >
+                  <span tal:content="org.name">Organization Name</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-xl"
+                  type="submit"
+          >Continue</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

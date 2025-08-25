@@ -30,6 +30,14 @@ def main(global_config, **settings):
     with Configurator(settings=settings) as config:
         config.include("pyramid_chameleon")
         config.include("pyramid_services")
+        # Configure sessions
+        from pyramid.session import SignedCookieSessionFactory
+
+        session_factory = SignedCookieSessionFactory(
+            settings.get("session.secret", "seekrit")
+        )
+        config.set_session_factory(session_factory)
+
         config.include(".services")
         config.include(".security")
         config.include(".routes")

@@ -5,6 +5,8 @@ import pytest
 
 from easy_diagrams import main
 from easy_diagrams import models
+from easy_diagrams.models.organization import OrganizationTable
+from easy_diagrams.models.organization import organization_user_association
 
 
 @pytest.fixture(scope="session")
@@ -27,7 +29,34 @@ def user_factory_fixture(dbsession):
     yield create_user
 
 
+@pytest.fixture(name="organization_factory")
+def organization_factory_fixture(dbsession):
+    def create_organization(name=None):
+        if name is None:
+            name = f"org_{base36.dumps(uuid4().int)}"
+        org = OrganizationTable(name=name)
+        dbsession.add(org)
+        dbsession.flush()
+        return org
+
+    yield create_organization
+
+
+@pytest.fixture(name="organization")
+def organization_fixture(organization_factory):
+    """Dummy organization for tests."""
+    yield organization_factory()
+
+
 @pytest.fixture(name="user")
-def user_fixture(user_factory):
-    """Dummy user for tests."""
-    yield user_factory()
+def user_fixture(user_factory, organization, dbsession):
+    """Dummy user for tests with organization membership."""
+    user = user_factory()
+    # Add user to organization
+    dbsession.execute(
+        organization_user_association.insert().values(
+            user_id=user.id, organization_id=organization.id, is_owner=True
+        )
+    )
+    dbsession.flush()
+    yield user

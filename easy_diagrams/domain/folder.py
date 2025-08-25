@@ -11,7 +11,7 @@ FolderID = NewType("FolderID", str)
 @dataclass(frozen=True, config=ConfigDict(extra="forbid"))
 class Folder:
     id: FolderID
-    user_id: UUID
+    organization_id: UUID
     name: str
     parent_id: FolderID | None = None
 

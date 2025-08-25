@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from pyramid.request import Request
 from sqlalchemy import exc as sqlalchemy_exc
@@ -16,11 +17,13 @@ from easy_diagrams.models.folder import FolderTable
 class FolderRepository:
     """Repository for folder operations."""
 
-    user_id: str
     dbsession: object
+    organization_id: str
 
     def create(self, name: str, parent_id: FolderID = None) -> FolderID:
-        folder = FolderTable(user_id=self.user_id, name=name, parent_id=parent_id)
+        folder = FolderTable(
+            organization_id=UUID(self.organization_id), name=name, parent_id=parent_id
+        )
         self.dbsession.add(folder)
         self.dbsession.flush()
         return FolderID(folder.id)
@@ -29,7 +32,7 @@ class FolderRepository:
         try:
             folder = (
                 self.dbsession.query(FolderTable)
-                .filter_by(id=folder_id, user_id=self.user_id)
+                .filter_by(id=folder_id, organization_id=UUID(self.organization_id))
                 .one()
             )
         except sqlalchemy_exc.NoResultFound:
@@ -40,7 +43,7 @@ class FolderRepository:
         folder = self._get(folder_id)
         return Folder(
             id=FolderID(folder.id),
-            user_id=folder.user_id,
+            organization_id=folder.organization_id,
             name=folder.name,
             parent_id=FolderID(folder.parent_id) if folder.parent_id else None,
         )
@@ -58,7 +61,7 @@ class FolderRepository:
             FolderTable.parent_id,
             FolderTable.created_at,
             FolderTable.updated_at,
-        ).filter_by(user_id=self.user_id)
+        ).filter_by(organization_id=UUID(self.organization_id))
 
         if parent_id is not None:
             query = query.filter_by(parent_id=parent_id)
@@ -73,7 +76,9 @@ class FolderRepository:
         return tuple(FolderListItem(**folder._asdict()) for folder in query.all())
 
     def count(self, parent_id: FolderID = None) -> int:
-        query = self.dbsession.query(FolderTable).filter_by(user_id=self.user_id)
+        query = self.dbsession.query(FolderTable).filter_by(
+            organization_id=UUID(self.organization_id)
+        )
 
         if parent_id is not None:
             query = query.filter_by(parent_id=parent_id)
@@ -92,7 +97,10 @@ class FolderRepository:
 
 
 def factory(context, request: Request):
-    return FolderRepository(request.authenticated_userid, request.dbsession)
+    organization_id = request.session.get("selected_organization_id")
+    if not organization_id:
+        raise ValueError("organization_id is required")
+    return FolderRepository(request.dbsession, organization_id)
 
 
 def includeme(config):

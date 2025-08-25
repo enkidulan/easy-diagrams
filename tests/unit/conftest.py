@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 from pyramid.scripting import prepare
 
@@ -15,3 +17,16 @@ def app_request(app, request_host):
         request = env["request"]
         request.host = request_host
         yield request
+
+
+@pytest.fixture
+def mock_organization_repo():
+    return Mock()
+
+
+@pytest.fixture
+def mock_organization():
+    from easy_diagrams.domain.organization import Organization
+    from easy_diagrams.domain.organization import OrganizationID
+
+    return Organization(id=OrganizationID("test-id"), name="Test Org")

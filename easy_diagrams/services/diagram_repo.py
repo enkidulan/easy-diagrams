@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from pyramid.request import Request
 from sqlalchemy import exc as sqlalchemy_exc
@@ -22,12 +23,14 @@ class DiagramRepository:
     test the database layer in isolation and use fake it in other layers.
     """
 
-    user_id: str
     dbsession: object
     diagram_renderer: interfaces.IDiagramRenderer
+    organization_id: str
 
     def create(self, folder_id=None) -> DiagramID:
-        diagram = DiagramTable(user_id=self.user_id, folder_id=folder_id)
+        diagram = DiagramTable(
+            organization_id=UUID(self.organization_id), folder_id=folder_id
+        )
         self.dbsession.add(diagram)
         self.dbsession.flush()
         return DiagramID(diagram.id)
@@ -36,7 +39,7 @@ class DiagramRepository:
         try:
             diagram = (
                 self.dbsession.query(DiagramTable)
-                .filter_by(id=diagram_id, user_id=self.user_id)
+                .filter_by(id=diagram_id, organization_id=UUID(self.organization_id))
                 .one()
             )
         except sqlalchemy_exc.NoResultFound:
@@ -47,7 +50,7 @@ class DiagramRepository:
         diagram = self._get(diagram_id)
         return Diagram(
             id=DiagramID(diagram.id),
-            user_id=diagram.user_id,
+            organization_id=diagram.organization_id,
             title=diagram.title,
             is_public=diagram.is_public,
             code=diagram.code,
@@ -71,7 +74,7 @@ class DiagramRepository:
             DiagramTable.is_public,
             DiagramTable.created_at,
             DiagramTable.updated_at,
-        ).filter_by(user_id=self.user_id)
+        ).filter_by(organization_id=UUID(self.organization_id))
 
         if folder_id is not None:
             query = query.filter_by(folder_id=folder_id)
@@ -88,7 +91,10 @@ class DiagramRepository:
         )
 
     def count(self, folder_id=None) -> int:
-        query = self.dbsession.query(DiagramTable).filter_by(user_id=self.user_id)
+        query = self.dbsession.query(DiagramTable).filter_by(
+            organization_id=UUID(self.organization_id)
+        )
+
         if folder_id is not None:
             query = query.filter_by(folder_id=folder_id)
         else:
@@ -112,7 +118,7 @@ class DiagramRepository:
             diagram = self.dbsession.query(DiagramTable).filter_by(id=diagram_id).one()
         except sqlalchemy_exc.NoResultFound:
             raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
-        if diagram.user_id != self.user_id and not diagram.is_public:
+        if diagram.organization_id != self.organization_id and not diagram.is_public:
             raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
         if not diagram.image:
             raise DiagramNotFoundError(f"Diagram {diagram_id} has no image.")
@@ -121,9 +127,10 @@ class DiagramRepository:
 
 def factory(context, request: Request):
     diagram_renderer = request.find_service(interfaces.IDiagramRenderer)
-    return DiagramRepository(
-        request.authenticated_userid, request.dbsession, diagram_renderer
-    )
+    organization_id = request.session.get("selected_organization_id")
+    if not organization_id:
+        raise ValueError("organization_id is required")
+    return DiagramRepository(request.dbsession, diagram_renderer, organization_id)
 
 
 def includeme(config):

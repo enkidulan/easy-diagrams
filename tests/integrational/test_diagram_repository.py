@@ -11,9 +11,11 @@ from easy_diagrams.exceptions import DiagramNotFoundError
 from easy_diagrams.services.diagram_repo import DiagramRepository
 
 
-def test_create_diagram(dbsession, user):
+def test_create_diagram(dbsession, organization):
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     diagram_id = repository.create()
     # assert type(diagram_id) is DiagramID
@@ -25,20 +27,24 @@ def test_create_diagram(dbsession, user):
     assert diagram.render is None
 
 
-def test_create_diagram_non_existing_user_id(dbsession):
+def test_create_diagram_non_existing_organization_id(dbsession):
     repository = DiagramRepository(
-        user_id=uuid4(), dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(uuid4()),
     )
     with pytest.raises(
         sqlalchemy_exc.IntegrityError,
-        match='insert or update on table "diagrams" violates foreign key constraint "fk_diagrams_user_id_users"',
+        match='insert or update on table "diagrams" violates foreign key constraint "fk_diagrams_organization_id_organizations"',
     ):
         repository.create()
 
 
-def test_edit_diagram(dbsession, user):
+def test_edit_diagram(dbsession, organization):
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     diagram_id = repository.create()
 
@@ -86,47 +92,61 @@ class FakeDiagramRenderer:
         return b"test_image"
 
 
-def test_edit_not_own_diagram(dbsession, user, user_factory):
+def test_edit_diagram_different_organization(
+    dbsession, organization, organization_factory
+):
+    other_org = organization_factory()
     diagram_id = DiagramRepository(
-        user_id=user_factory().id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(other_org.id),
     ).create()
 
     changes = DiagramEdit(title="new_title")
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     with pytest.raises(DiagramNotFoundError, match=f"Diagram {diagram_id} not found."):
         repository.edit(diagram_id, changes)
 
 
-def test_get_diagram(dbsession, user):
+def test_get_diagram(dbsession, organization):
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     diagram_id = repository.create()
     diagram = repository.get(diagram_id)
     assert isinstance(diagram, Diagram)
 
 
-def test_get_not_own_diagram(dbsession, user, user_factory):
+def test_get_diagram_different_organization(
+    dbsession, organization, organization_factory
+):
+    other_org = organization_factory()
     diagram_id = DiagramRepository(
-        user_id=user_factory().id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(other_org.id),
     ).create()
 
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     with pytest.raises(DiagramNotFoundError, match=f"Diagram {diagram_id} not found."):
         repository.get(diagram_id)
 
 
-def test_delete_diagram(dbsession, user):
+def test_delete_diagram(dbsession, organization):
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     diagram_id = repository.create()
     repository.delete(diagram_id)
@@ -134,34 +154,42 @@ def test_delete_diagram(dbsession, user):
         repository.get(diagram_id)
 
 
-def test_delete_not_own_diagram(dbsession, user, user_factory):
+def test_delete_diagram_different_organization(
+    dbsession, organization, organization_factory
+):
+    other_org = organization_factory()
     diagram_id = DiagramRepository(
-        user_id=user_factory().id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(other_org.id),
     ).create()
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
     with pytest.raises(DiagramNotFoundError, match=f"Diagram {diagram_id} not found."):
         repository.delete(diagram_id)
 
 
-def test_list_diagrams(dbsession, user, user_factory):
-    # creating diagrams that don't belong to the user to make sure that the user
-    # can see only his/her diagrams
+def test_list_diagrams(dbsession, organization, organization_factory):
+    # creating diagrams that don't belong to the organization to make sure that the organization
+    # can see only its diagrams
+    other_org = organization_factory()
     for _ in range(10):
         DiagramRepository(
-            user_id=user_factory().id,
             dbsession=dbsession,
             diagram_renderer=FakeDiagramRenderer(),
+            organization_id=str(other_org.id),
         ).create()
 
     repository = DiagramRepository(
-        user_id=user.id, dbsession=dbsession, diagram_renderer=FakeDiagramRenderer()
+        dbsession=dbsession,
+        diagram_renderer=FakeDiagramRenderer(),
+        organization_id=str(organization.id),
     )
 
-    # creating diagrams that belong to the user
+    # creating diagrams that belong to the organization
     for i in range(10):
         diagram_id = repository.create()
         changes = DiagramEdit(

@@ -1,0 +1,72 @@
+<div metal:use-macro="load: layout.pt">
+  <div class="container px-4 px-lg-5 h-100"
+       metal:fill-slot="masthead"
+  >
+    <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light">
+      <div class="col-12">
+        <h2 class="mb-4">Organizations</h2>
+
+        <!-- Create Organization Form -->
+        <div class="mb-4">
+          <form method="post">
+            <input name="csrf_token"
+                   type="hidden"
+                   value="${get_csrf_token()}"
+            />
+            <div class="input-group mb-3"
+                 style="max-width: 400px;"
+            >
+              <input class="form-control"
+                     name="name"
+                     placeholder="Organization name"
+                     required
+                     type="text"
+              />
+              <button class="btn btn-primary"
+                      type="submit"
+              >Create Organization</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Organizations List -->
+        <div id="organizations-list">
+          <table class="table table-striped"
+                 tal:condition="organizations"
+          >
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr tal:repeat="org organizations">
+                <td>
+                  <a class="link-secondary link-underline-light"
+                     href="${request.route_url('organization_entity', organization_id=org.id.value)}"
+                  >${org.name}</a>
+                </td>
+                <td>
+                  <a class="btn btn-sm btn-outline-primary"
+                     href="${request.route_url('organization_entity', organization_id=org.id.value)}"
+                  >Manage</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="text-muted"
+             tal:condition="not organizations"
+          >No organizations found. Create your first organization above.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <metal metal:fill-slot="scripts"
+         tal:omit-tag=""
+  >
+  </metal>
+
+</div>

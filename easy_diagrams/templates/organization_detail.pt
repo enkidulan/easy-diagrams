@@ -1,0 +1,222 @@
+<div metal:use-macro="load: layout.pt">
+  <div class="container px-4 px-lg-5 h-100"
+       metal:fill-slot="masthead"
+  >
+    <div class="row gx-1 gx-lg-1 h-100 align-items-start justify-content-start opacity-90 bg-light">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">${organization.name}</h2>
+          <div>
+            <a class="btn btn-outline-secondary"
+               href="${request.route_url('organizations')}"
+            >&larr; Back to Organizations</a>
+            <form action="${request.route_url('organization_entity', organization_id=organization.id.value)}"
+                  method="post"
+                  onsubmit="return confirm('Are you sure you want to delete this organization?')"
+                  style="display: inline;"
+            >
+              <input name="csrf_token"
+                     type="hidden"
+                     value="${get_csrf_token()}"
+              />
+              <input name="_method"
+                     type="hidden"
+                     value="DELETE"
+              />
+              <button class="btn btn-outline-danger"
+                      type="submit"
+              >Delete Organization</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Edit Organization Form -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Organization Settings</h5>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              <input name="csrf_token"
+                     type="hidden"
+                     value="${get_csrf_token()}"
+              />
+              <input name="_method"
+                     type="hidden"
+                     value="PUT"
+              />
+              <div class="mb-3">
+                <label class="form-label"
+                       for="name"
+                >Organization Name</label>
+                <input class="form-control"
+                       name="name"
+                       required
+                       type="text"
+                       value="${organization.name}"
+                />
+              </div>
+              <button class="btn btn-primary"
+                      type="submit"
+              >Update Organization</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Add User Form -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">Add User</h5>
+          </div>
+          <div class="card-body">
+            <form action="${request.route_url('organization_users', organization_id=organization.id.value)}"
+                  method="post"
+            >
+              <input name="csrf_token"
+                     type="hidden"
+                     value="${get_csrf_token()}"
+              />
+              <div class="row">
+                <div class="col-md-6">
+                  <input class="form-control"
+                         name="email"
+                         placeholder="User email"
+                         required
+                         type="email"
+                  />
+                </div>
+                <div class="col-md-3">
+                  <div class="form-check">
+                    <input class="form-check-input"
+                           id="is_owner"
+                           name="is_owner"
+                           type="checkbox"
+                    />
+                    <label class="form-check-label"
+                           for="is_owner"
+                    >Make Owner</label>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <button class="btn btn-success"
+                          type="submit"
+                  >Add User</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Users List -->
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Organization Members</h5>
+          </div>
+          <div class="card-body">
+            <div id="users-list">
+              <table class="table table-striped"
+                     tal:condition="users"
+              >
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr tal:repeat="user users">
+                    <td>${user['email']}</td>
+                    <td>
+                      <span class="badge bg-primary"
+                            tal:condition="user['is_owner']"
+                      >Owner</span>
+                      <span class="badge bg-secondary"
+                            tal:condition="not user['is_owner']"
+                      >Member</span>
+                    </td>
+                    <td>
+                      <div class="btn-group"
+                           role="group"
+                      >
+                        <form action="${request.route_url('organization_user_entity', organization_id=organization.id.value, user_id=user['id'])}"
+                              method="post"
+                              style="display: inline;"
+                              tal:condition="not user['is_owner']"
+                        >
+                          <input name="csrf_token"
+                                 type="hidden"
+                                 value="${get_csrf_token()}"
+                          />
+                          <input name="_method"
+                                 type="hidden"
+                                 value="PUT"
+                          />
+                          <input name="action"
+                                 type="hidden"
+                                 value="make_owner"
+                          />
+                          <button class="btn btn-sm btn-outline-warning"
+                                  type="submit"
+                          >Make Owner</button>
+                        </form>
+                        <form action="${request.route_url('organization_user_entity', organization_id=organization.id.value, user_id=user['id'])}"
+                              method="post"
+                              style="display: inline;"
+                              tal:condition="python: user['is_owner'] and len([u for u in users if u['is_owner']]) > 1"
+                        >
+                          <input name="csrf_token"
+                                 type="hidden"
+                                 value="${get_csrf_token()}"
+                          />
+                          <input name="_method"
+                                 type="hidden"
+                                 value="PUT"
+                          />
+                          <input name="action"
+                                 type="hidden"
+                                 value="remove_owner"
+                          />
+                          <button class="btn btn-sm btn-outline-secondary"
+                                  type="submit"
+                          >Remove Owner</button>
+                        </form>
+                        <form action="${request.route_url('organization_user_entity', organization_id=organization.id.value, user_id=user['id'])}"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to remove this user?')"
+                              style="display: inline;"
+                        >
+                          <input name="csrf_token"
+                                 type="hidden"
+                                 value="${get_csrf_token()}"
+                          />
+                          <input name="_method"
+                                 type="hidden"
+                                 value="DELETE"
+                          />
+                          <button class="btn btn-sm btn-outline-danger"
+                                  type="submit"
+                          >Remove</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="text-muted"
+                 tal:condition="not users"
+              >No users in this organization.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <metal metal:fill-slot="scripts"
+         tal:omit-tag=""
+  >
+  </metal>
+
+</div>
