@@ -45,12 +45,6 @@ class User(Base):
     #: When this logged in the system last time. Information stored for the security audits.
     last_login_at = Column(DateTime, nullable=True)
 
-    #: User's diagrams
-    diagrams = relationship("DiagramTable", back_populates="user")
-
-    #: User's folders
-    folders = relationship("FolderTable", back_populates="user")
-
     #: User's organizations
     organizations = relationship(
         "OrganizationTable", secondary="organization_users", back_populates="users"

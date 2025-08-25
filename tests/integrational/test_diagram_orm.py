@@ -17,10 +17,10 @@ def patched_code_version_fixture(monkeypatch):
 
 
 @pytest.fixture(name="diagram")
-def diagram_fixture(dbsession, user, patched_code_version):
+def diagram_fixture(dbsession, organization, patched_code_version):
     """Dummy diagram instance for tests."""
     diagram = models.DiagramTable(
-        user=user,
+        organization_id=organization.id,
         code="1",
     )
     diagram.set_image(b"1", diagram.code_version)
@@ -33,23 +33,23 @@ def diagram_fixture(dbsession, user, patched_code_version):
     yield diagram
 
 
-def test_diagram_is_required_to_have_a_user(dbsession):
+def test_diagram_is_required_to_have_an_organization(dbsession):
     diagram = models.DiagramTable()
     dbsession.add(diagram)
-    with pytest.raises(IntegrityError, match='null value in column "user_id"'):
+    with pytest.raises(IntegrityError, match='null value in column "organization_id"'):
         dbsession.flush()
 
 
-def test_diagram_id_is_auto_generated(dbsession, user):
-    diagram = models.DiagramTable(user=user)
+def test_diagram_id_is_auto_generated(dbsession, organization):
+    diagram = models.DiagramTable(organization_id=organization.id)
     assert diagram.id is None
     dbsession.add(diagram)
     dbsession.flush()
     assert diagram.id is not None
 
 
-def test_create_all_empty(dbsession, user):
-    diagram = models.DiagramTable(user=user)
+def test_create_all_empty(dbsession, organization):
+    diagram = models.DiagramTable(organization_id=organization.id)
     assert diagram.id is None
     dbsession.add(diagram)
     dbsession.flush()
@@ -60,8 +60,8 @@ def test_create_all_empty(dbsession, user):
     assert diagram.image is None
 
 
-def test_create_all_set(dbsession, user, patched_code_version):
-    diagram = models.DiagramTable(user=user)
+def test_create_all_set(dbsession, organization, patched_code_version):
+    diagram = models.DiagramTable(organization_id=organization.id)
     diagram.code = "1"
     diagram.set_image(b"1", diagram.code_version)
     dbsession.add(diagram)
@@ -72,8 +72,8 @@ def test_create_all_set(dbsession, user, patched_code_version):
     assert diagram.image == b"1"
 
 
-def test_create_no_image(dbsession, user, patched_code_version):
-    diagram = models.DiagramTable(user=user)
+def test_create_no_image(dbsession, organization, patched_code_version):
+    diagram = models.DiagramTable(organization_id=organization.id)
     diagram.code = "1"
     dbsession.add(diagram)
     dbsession.flush()
