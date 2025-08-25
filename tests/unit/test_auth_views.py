@@ -45,7 +45,4 @@ def test_social_login_new_user_creates_organization(app_request):
             "newuser@example.com", "user-123"
         )
 
-        # Verify user's organization_id was set
-        assert mock_user.organization_id == "org-123"
-
         assert isinstance(result, HTTPSeeOther)

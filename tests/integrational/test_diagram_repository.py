@@ -9,9 +9,9 @@ from easy_diagrams.exceptions import DiagramNotFoundError
 from easy_diagrams.services.diagram_repo import DiagramRepository
 
 
-def test_create_diagram(dbsession, user):
+def test_create_diagram(dbsession, user, organization):
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -38,9 +38,9 @@ def test_create_diagram_non_existing_user_id(dbsession):
         repository.create()
 
 
-def test_edit_diagram(dbsession, user):
+def test_edit_diagram(dbsession, user, organization):
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -90,16 +90,20 @@ class FakeDiagramRenderer:
         return b"test_image"
 
 
-def test_edit_not_own_diagram(dbsession, user, user_factory):
+def test_edit_not_own_diagram(
+    dbsession, user, organization, user_factory, organization_factory
+):
+    other_org = organization_factory()
+    _other_user = user_factory(organization=other_org)
     diagram_id = DiagramRepository(
-        organization_id=user_factory().organization_id,
+        organization_id=other_org.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     ).create()
 
     changes = DiagramEdit(title="new_title")
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -107,9 +111,9 @@ def test_edit_not_own_diagram(dbsession, user, user_factory):
         repository.edit(diagram_id, changes)
 
 
-def test_get_diagram(dbsession, user):
+def test_get_diagram(dbsession, user, organization):
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -118,15 +122,19 @@ def test_get_diagram(dbsession, user):
     assert isinstance(diagram, Diagram)
 
 
-def test_get_not_own_diagram(dbsession, user, user_factory):
+def test_get_not_own_diagram(
+    dbsession, user, organization, user_factory, organization_factory
+):
+    other_org = organization_factory()
+    _other_user = user_factory(organization=other_org)
     diagram_id = DiagramRepository(
-        organization_id=user_factory().organization_id,
+        organization_id=other_org.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     ).create()
 
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -134,9 +142,9 @@ def test_get_not_own_diagram(dbsession, user, user_factory):
         repository.get(diagram_id)
 
 
-def test_delete_diagram(dbsession, user):
+def test_delete_diagram(dbsession, user, organization):
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -146,14 +154,18 @@ def test_delete_diagram(dbsession, user):
         repository.get(diagram_id)
 
 
-def test_delete_not_own_diagram(dbsession, user, user_factory):
+def test_delete_not_own_diagram(
+    dbsession, user, organization, user_factory, organization_factory
+):
+    other_org = organization_factory()
+    _other_user = user_factory(organization=other_org)
     diagram_id = DiagramRepository(
-        organization_id=user_factory().organization_id,
+        organization_id=other_org.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     ).create()
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )
@@ -161,18 +173,22 @@ def test_delete_not_own_diagram(dbsession, user, user_factory):
         repository.delete(diagram_id)
 
 
-def test_list_diagrams(dbsession, user, user_factory):
+def test_list_diagrams(
+    dbsession, user, organization, user_factory, organization_factory
+):
     # creating diagrams that don't belong to the user to make sure that the user
     # can see only his/her diagrams
     for _ in range(10):
+        other_org = organization_factory()
+        _other_user = user_factory(organization=other_org)
         DiagramRepository(
-            organization_id=user_factory().organization_id,
+            organization_id=other_org.id,
             dbsession=dbsession,
             diagram_renderer=FakeDiagramRenderer(),
         ).create()
 
     repository = DiagramRepository(
-        organization_id=user.organization_id,
+        organization_id=organization.id,
         dbsession=dbsession,
         diagram_renderer=FakeDiagramRenderer(),
     )

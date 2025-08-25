@@ -20,31 +20,32 @@ def test_create_for_user(dbsession):
     assert org.name == f"{user_email}'s Organization"
 
     # Check user is owner
-    from easy_diagrams.models.organization import organization_owners
+    from easy_diagrams.models.organization import organization_users
 
     result = dbsession.execute(
-        organization_owners.select().where(
-            organization_owners.c.organization_id == str(org_id),
-            organization_owners.c.user_id == user.id,
+        organization_users.select().where(
+            organization_users.c.organization_id == str(org_id),
+            organization_users.c.user_id == user.id,
+            organization_users.c.is_owner.is_(True),
         )
     ).fetchone()
     assert result is not None
 
 
-def test_get_by_user(dbsession, user):
+def test_get_by_user(dbsession, user, organization):
     repo = OrganizationRepository(dbsession)
 
     org = repo.get_by_user(user.id)
 
-    assert org.id == user.organization_id
-    assert user.email in org.name
+    assert org.id == organization.id
+    assert org.name is not None
 
 
-def test_update_name(dbsession, user):
+def test_update_name(dbsession, user, organization):
     repo = OrganizationRepository(dbsession)
     new_name = "Updated Organization Name"
 
-    repo.update_name(user.organization_id, new_name)
+    repo.update_name(organization.id, new_name)
 
-    org = dbsession.query(OrganizationTable).filter_by(id=user.organization_id).one()
+    org = dbsession.query(OrganizationTable).filter_by(id=organization.id).one()
     assert org.name == new_name

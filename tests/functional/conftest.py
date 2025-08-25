@@ -77,18 +77,15 @@ def user_factory_fixture(dbsession):
         from easy_diagrams.services.organization_repo import OrganizationRepository
 
         # Create user without organization first
-        user = models.User(email=email, organization_id=None)
+        user = models.User(email=email)
         dbsession.add(user)
         dbsession.flush()
 
         # Create organization and make user owner
         org_repo = OrganizationRepository(dbsession)
-        org_id = org_repo.create_for_user(email, user.id)
-        user.organization_id = str(org_id)
-        dbsession.flush()
+        org_repo.create_for_user(email, user.id)
 
         assert user.id is not None
-        assert user.organization_id is not None
         return user
 
     yield create_user

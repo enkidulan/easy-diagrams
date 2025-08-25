@@ -1,11 +1,9 @@
 from datetime import datetime
-from uuid import uuid4
 
 import pytest
 from sqlalchemy.exc import IntegrityError
 
 from easy_diagrams import models
-from easy_diagrams.models.organization import OrganizationTable
 
 
 def test_user_email_is_unique(dbsession):
@@ -21,18 +19,11 @@ def test_user_email_is_unique(dbsession):
 
 
 def test_user_creation(dbsession):
-    # Create organization first
-    org_id = str(uuid4())
-    org = OrganizationTable(id=org_id, name="Test Organization")
-    dbsession.add(org)
-    dbsession.flush()
-
-    user = models.User(email="newuser@example.com", organization_id=org_id)
+    user = models.User(email="newuser@example.com")
     dbsession.add(user)
     dbsession.flush()
     assert user.id is not None
     assert user.email == "newuser@example.com"
-    assert user.organization_id == org_id
     assert user.created_at is not None
     assert user.updated_at is None
     assert user.activated_at is None
