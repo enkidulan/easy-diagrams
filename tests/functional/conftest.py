@@ -57,6 +57,30 @@ class TestApp(webtest.TestApp):
 
     def login(self, user_email="dummy@example.com", status=303):
         """Convenience method to login the client."""
+        from easy_diagrams import models
+        from easy_diagrams.services.organization_repo import OrganizationRepo
+
+        # Get the app's dbsession from the test environment
+        dbsession = self.app.registry.settings.get("app.dbsession")
+        if not dbsession:
+            # Fallback to getting from extra_environ if not in settings
+            dbsession = self.extra_environ.get("app.dbsession")
+
+        # Create or get user
+        user = dbsession.query(models.User).filter_by(email=user_email).first()
+        if not user:
+            user = models.User(email=user_email)
+            dbsession.add(user)
+            dbsession.flush()
+
+        # Create default organization for user if they don't have one
+        org_repo = OrganizationRepo(user.id, dbsession)
+        organizations = org_repo.list()
+        if not organizations:
+            _ = org_repo.create(f"Test Organization for {user_email}")
+            dbsession.flush()
+            organizations = org_repo.list()
+
         self.get(
             "/social_login/google",
             status=status,

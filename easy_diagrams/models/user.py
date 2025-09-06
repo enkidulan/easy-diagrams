@@ -12,7 +12,15 @@ from .meta import Base
 
 
 class User(Base):
-    """User model."""
+    """User model.
+
+    User-Organization Lifecycle:
+    - Users can belong to multiple organizations
+    - When a user is added to an organization, they get access to that organization's resources
+    - Users can be owners or regular members of organizations
+    - Deleting a user removes them from all organizations
+    - Users are automatically created when added to organizations by email if they don't exist
+    """
 
     __tablename__ = "users"
 
@@ -37,8 +45,7 @@ class User(Base):
     #: When this logged in the system last time. Information stored for the security audits.
     last_login_at = Column(DateTime, nullable=True)
 
-    #: User's diagrams
-    diagrams = relationship("DiagramTable", back_populates="user")
-
-    #: User's folders
-    folders = relationship("FolderTable", back_populates="user")
+    #: User's organizations
+    organizations = relationship(
+        "OrganizationTable", secondary="organization_users", back_populates="users"
+    )
