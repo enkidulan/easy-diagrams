@@ -24,8 +24,9 @@ class TestOrganizationsViewIntegration:
 
         # List organizations
         result = view.organizations_list()
-        assert len(result["organizations"]) == 1
-        assert result["organizations"][0].name == "Test Org"
+        assert len(result["organizations"]) == 2  # 1 created + 1 from fixture
+        org_names = {org.name for org in result["organizations"]}
+        assert "Test Org" in org_names
 
 
 class TestOrganizationDetailViewIntegration:

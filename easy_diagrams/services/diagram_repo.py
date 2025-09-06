@@ -28,6 +28,8 @@ class DiagramRepository:
     organization_id: str
 
     def create(self, folder_id=None) -> DiagramID:
+        if self.organization_id is None:
+            raise ValueError("organization_id is required for creating diagrams")
         diagram = DiagramTable(
             organization_id=UUID(self.organization_id), folder_id=folder_id
         )
@@ -36,6 +38,8 @@ class DiagramRepository:
         return DiagramID(diagram.id)
 
     def _get(self, diagram_id) -> DiagramTable:
+        if self.organization_id is None:
+            raise ValueError("organization_id is required for accessing diagrams")
         try:
             diagram = (
                 self.dbsession.query(DiagramTable)
@@ -68,6 +72,8 @@ class DiagramRepository:
         self.dbsession.delete(diagram)
 
     def list(self, offset=0, limit=100, folder_id=None) -> list[DiagramListItem]:
+        if self.organization_id is None:
+            raise ValueError("organization_id is required for listing diagrams")
         query = self.dbsession.query(
             DiagramTable.id,
             DiagramTable.title,
@@ -91,6 +97,8 @@ class DiagramRepository:
         )
 
     def count(self, folder_id=None) -> int:
+        if self.organization_id is None:
+            raise ValueError("organization_id is required for counting diagrams")
         query = self.dbsession.query(DiagramTable).filter_by(
             organization_id=UUID(self.organization_id)
         )
@@ -118,8 +126,20 @@ class DiagramRepository:
             diagram = self.dbsession.query(DiagramTable).filter_by(id=diagram_id).one()
         except sqlalchemy_exc.NoResultFound:
             raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
-        if diagram.organization_id != self.organization_id and not diagram.is_public:
-            raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
+
+        # Check access permissions
+        if self.organization_id is None:
+            # No organization context - only allow public diagrams
+            if not diagram.is_public:
+                raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
+        else:
+            # Organization context - allow own diagrams or public diagrams
+            if (
+                str(diagram.organization_id) != self.organization_id
+                and not diagram.is_public
+            ):
+                raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
+
         if not diagram.image:
             raise DiagramNotFoundError(f"Diagram {diagram_id} has no image.")
         return diagram.image
@@ -129,7 +149,9 @@ def factory(context, request: Request):
     diagram_renderer = request.find_service(interfaces.IDiagramRenderer)
     organization_id = request.session.get("selected_organization_id")
     if not organization_id:
-        raise ValueError("organization_id is required")
+        # For public image access, we can use None as organization_id
+        # The get_image_render method handles public diagrams specially
+        organization_id = None
     return DiagramRepository(request.dbsession, diagram_renderer, organization_id)
 
 

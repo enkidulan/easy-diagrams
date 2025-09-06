@@ -65,7 +65,7 @@ def test_list_organizations(organization_repo):
 
     orgs = organization_repo.list()
 
-    assert len(orgs) == 2
+    assert len(orgs) == 3  # 2 created + 1 from fixture
     org_names = {org.name for org in orgs}
     assert "Org 1" in org_names
     assert "Org 2" in org_names

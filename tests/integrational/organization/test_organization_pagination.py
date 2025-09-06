@@ -18,7 +18,9 @@ def test_list_pagination_default(organization_repo):
 
     orgs = organization_repo.list()
 
-    assert len(orgs) == 5  # All should fit in default limit of 20
+    assert (
+        len(orgs) == 6
+    )  # 5 created + 1 from fixture, all should fit in default limit of 20
 
 
 def test_list_pagination_with_limit(organization_repo):
@@ -44,9 +46,9 @@ def test_list_pagination_with_offset(organization_repo):
     first_batch = organization_repo.list(limit=3)
     assert len(first_batch) == 3
 
-    # Get next 2 with offset
+    # Get next 3 with offset (should get remaining 3: 2 created + 1 from fixture)
     second_batch = organization_repo.list(offset=3, limit=3)
-    assert len(second_batch) == 2
+    assert len(second_batch) == 3
 
 
 def test_get_owners_pagination_default(organization_repo, dbsession):
