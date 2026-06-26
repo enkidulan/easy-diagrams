@@ -3,13 +3,13 @@ from datetime import datetime
 from pyramid.csrf import new_csrf_token
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.security import NO_PERMISSION_REQUIRED
-from pyramid.security import forget
 from pyramid.security import remember
 from pyramid.view import forbidden_view_config
 from pyramid.view import view_config
 
 from easy_diagrams import interfaces
 from easy_diagrams import models
+from easy_diagrams.security import logout_user
 from easy_diagrams.services.organization_repo import OrganizationRepo
 
 
@@ -74,13 +74,7 @@ def login_view(request):
     route_name="logout", request_method="POST", permission=NO_PERMISSION_REQUIRED
 )
 def logout_view(request):
-    next_url = request.route_url("home")
-    # Clear organization session data
-    request.session.pop("selected_organization_id", None)
-    request.session.pop("selected_organization_name", None)
-    new_csrf_token(request)
-    headers = forget(request)
-    return HTTPSeeOther(location=next_url, headers=headers)
+    return logout_user(request, location=request.route_url("home"))
 
 
 @view_config(

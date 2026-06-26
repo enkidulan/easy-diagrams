@@ -85,8 +85,9 @@ the image is build from ``Dockerfile.plantuml`` and pushed to Docker:
 
 .. code-block:: bash
 
-    docker build -t enkidulan/plantuml:1.2025.3 -t enkidulan/plantuml:latest --build-arg PLANTUML_VERSION=1.2025.3 -f Dockerfile.plantuml .
-    docker push enkidulan/plantuml:1.2025.3
+    export PLANTUML_VERSION=1.2026.6
+    docker build -t enkidulan/plantuml:$PLANTUML_VERSION -t enkidulan/plantuml:latest --build-arg PLANTUML_VERSION=$PLANTUML_VERSION -f Dockerfile.plantuml .
+    docker push enkidulan/plantuml:$PLANTUML_VERSION
 
 
 EasyDiagrams Design

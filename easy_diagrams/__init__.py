@@ -33,8 +33,12 @@ def main(global_config, **settings):
         # Configure sessions
         from pyramid.session import SignedCookieSessionFactory
 
+        from easy_diagrams.security import AUTH_COOKIE_MAX_AGE
+
         session_factory = SignedCookieSessionFactory(
-            settings.get("session.secret", "seekrit")
+            settings.get("session.secret", "seekrit"),
+            max_age=AUTH_COOKIE_MAX_AGE,
+            timeout=AUTH_COOKIE_MAX_AGE,
         )
         config.set_session_factory(session_factory)
 
