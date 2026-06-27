@@ -183,9 +183,11 @@ class DiagramViews(DiagramResourceMixin):
     @view_config(
         route_name="diagram_view_builtin",
         renderer="easy_diagrams:templates/diagram_builtin.pt",
+        permission=NO_PERMISSION_REQUIRED,
     )
     def builtin_editor(self):
-        return {"diagram": self.diagram}
+        diagram, can_edit = self.diagram_repo.get_with_access(self.requested_diagram_id)
+        return {"diagram": diagram, "can_edit": can_edit}
 
     @view_config(
         route_name="diagram_view_json",

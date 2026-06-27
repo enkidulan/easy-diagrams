@@ -45,7 +45,7 @@ class TestDiagramCreate:
     def test_csrf_token_is_required(self, testapp):
         testapp.login()
         res = testapp.post("/diagrams", status=400)
-        assert "400 Bad CSRF Token" in res.text
+        assert "Bad CSRF token" in res.text
 
     def test_user_must_be_logged_in(self, testapp, csrf_headers, request_host):
         res = testapp.post("/diagrams", status=303, **csrf_headers)
@@ -166,7 +166,7 @@ class TestDiagramResourceDelete:
     def test_csrf_token_is_required(self, testapp, diagram):
         res = testapp.delete(f"/diagrams/{diagram['id']}", status=400)
         assert res.status_code == 400
-        assert "400 Bad CSRF Token" in res.text
+        assert "Bad CSRF token" in res.text
 
     def test_user_can_delete_only_own_diagrams(
         self, testapp, csrf_headers, user_factory, diagram
@@ -264,7 +264,7 @@ class TestDiagramResourceUpdate:
 
     def test_csrf_token_is_required(self, testapp, diagram):
         res = testapp.put(f"/diagrams/{diagram['id']}", params={}, status=400)
-        assert "400 Bad CSRF Token" in res.text
+        assert "Bad CSRF token" in res.text
 
     def test_user_can_update_only_own_diagrams(
         self, testapp, csrf_headers, user_factory, diagram
@@ -323,11 +323,40 @@ class TestDiagramBuiltinEditor:
     This view is embedded via iframe to 3rd party sites."""
 
     def test_builtin_view(self, testapp, diagram):
-        testapp.get(f"/diagrams/{diagram['id']}/builtin", status=200)
+        res = testapp.get(f"/diagrams/{diagram['id']}/builtin", status=200)
+        assert "click here to edit" in res.text
 
-    def test_user_must_be_logged_in(self, testapp, request_host):
-        res = testapp.get("/diagrams/abcd/builtin", status=303)
-        assert res.location.startswith(f"http://{request_host}/login?next=")
+    def test_public_builtin_view_without_login(self, testapp, csrf_headers, diagram):
+        testapp.put(
+            f"/diagrams/{diagram['id']}",
+            params={"is_public": True},
+            status=200,
+            **csrf_headers,
+        )
+        testapp.logout()
+        res = testapp.get(f"/diagrams/{diagram['id']}/builtin", status=200)
+        assert "click here to edit" not in res.text
+        assert 'id="editor"' not in res.text
+        assert 'id="spinner"' not in res.text
+
+    def test_private_builtin_view_requires_login(self, testapp, diagram):
+        testapp.logout()
+        testapp.get(f"/diagrams/{diagram['id']}/builtin", status=404)
+
+    def test_public_builtin_view_other_org_read_only(
+        self, testapp, user_factory, csrf_headers, diagram
+    ):
+        testapp.put(
+            f"/diagrams/{diagram['id']}",
+            params={"is_public": True},
+            status=200,
+            **csrf_headers,
+        )
+        testapp.login(user_factory().email)
+        res = testapp.get(f"/diagrams/{diagram['id']}/builtin", status=200)
+        assert "click here to edit" not in res.text
+        assert 'id="editor"' not in res.text
+        assert 'id="spinner"' not in res.text
 
     def test_builtin_view_can_be_invoked_only_own_diagrams(
         self, testapp, user_factory, diagram
@@ -336,7 +365,6 @@ class TestDiagramBuiltinEditor:
         testapp.get(f"/diagrams/{diagram['id']}/builtin", status=404)
 
     def test_not_existing_diagram(self, testapp):
-        testapp.login()
         testapp.get("/diagrams/abcd/builtin", status=404)
 
 

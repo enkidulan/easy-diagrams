@@ -121,6 +121,40 @@ class DiagramRepository:
             diagram.set_image(image, diagram.code_version)
         return self.get(diagram_id)
 
+    def get_with_access(self, diagram_id) -> tuple[Diagram, bool]:
+        try:
+            diagram = self.dbsession.query(DiagramTable).filter_by(id=diagram_id).one()
+        except sqlalchemy_exc.NoResultFound:
+            raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
+
+        if self.organization_id is None:
+            if not diagram.is_public:
+                raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
+            can_edit = False
+        else:
+            is_owner = str(diagram.organization_id) == self.organization_id
+            if not is_owner and not diagram.is_public:
+                raise DiagramNotFoundError(f"Diagram {diagram_id} not found.")
+            can_edit = is_owner
+
+        return (
+            Diagram(
+                id=DiagramID(diagram.id),
+                organization_id=diagram.organization_id,
+                title=diagram.title,
+                is_public=diagram.is_public,
+                code=diagram.code,
+                code_version=diagram.code_version,
+                render=(
+                    DiagramRender(image=diagram.image, version=diagram.image_version)
+                    if diagram.image
+                    else None
+                ),
+                folder_id=diagram.folder_id,
+            ),
+            can_edit,
+        )
+
     def get_image_render(self, diagram_id) -> bytes:
         try:
             diagram = self.dbsession.query(DiagramTable).filter_by(id=diagram_id).one()

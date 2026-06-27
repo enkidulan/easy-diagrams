@@ -41,15 +41,19 @@
              id="display-title"
              href="${request.route_url('diagram_view_editor', diagram_id=diagram.id)}"
              target="_blank"
+             tal:condition="can_edit"
           >
             ${diagram.title}</a>
+          <span tal:condition="not:can_edit">${diagram.title}</span>
           <small class="collapsible"
                  hx-on-click="htmx.toggleClass('.collapsible', 'expanded'); htmx.toggleClass('.collapsible-content', 'd-none')"
+                 tal:condition="can_edit"
           >(click here to edit)</small>
 
 
           <div class="htmx-indicator"
                id="spinner"
+               tal:condition="can_edit"
           >
             <div class="spinner-border spinner-border-sm"
                  role="status"
@@ -63,7 +67,9 @@
         </figcaption>
       </div>
       <div class="row h-100 w-100 text-center">
-        <div class="col w-100 collapsible-content d-none">
+        <div class="col w-100 collapsible-content d-none"
+             tal:condition="can_edit"
+        >
           <div class="row">
             <div class="col-sm-auto">
 
@@ -126,21 +132,23 @@
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     ></script>
-    <script crossorigin="anonymous"
-            src="https://cdn.jsdelivr.net/npm/ace-builds@1.38.0/src-min-noconflict/ace.js"
-    ></script>
-    <script crossorigin="anonymous"
-            src="https://cdn.jsdelivr.net/npm/ace-builds@1.38.0/src-min-noconflict/theme-monokai.js"
-    ></script>
-    <script crossorigin="anonymous"
-            src="https://unpkg.com/htmx.org@2.0.4"
-    ></script>
+    <tal:block tal:condition="can_edit">
+      <script crossorigin="anonymous"
+              src="https://cdn.jsdelivr.net/npm/ace-builds@1.38.0/src-min-noconflict/ace.js"
+      ></script>
+      <script crossorigin="anonymous"
+              src="https://cdn.jsdelivr.net/npm/ace-builds@1.38.0/src-min-noconflict/theme-monokai.js"
+      ></script>
+      <script crossorigin="anonymous"
+              src="https://unpkg.com/htmx.org@2.0.4"
+      ></script>
 
 
-    <script>
-      var editor = ace.edit("editor");
-      editor.setKeyboardHandler("ace/keyboard/sublime");
-    </script>
+      <script>
+        var editor = ace.edit("editor");
+        editor.setKeyboardHandler("ace/keyboard/sublime");
+      </script>
+    </tal:block>
 
   </body>
 </html>

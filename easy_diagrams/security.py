@@ -5,6 +5,7 @@ from pyramid.authorization import Everyone
 from pyramid.config import Configurator
 from pyramid.csrf import CookieCSRFStoragePolicy
 from pyramid.csrf import new_csrf_token
+from pyramid.events import BeforeTraversal
 from pyramid.httpexceptions import HTTPSeeOther
 from pyramid.request import RequestLocalCache
 from pyramid.security import forget
@@ -44,20 +45,16 @@ def logout_user(request, location=None):
     return HTTPSeeOther(location=location, headers=headers)
 
 
-def require_organization_tween_factory(handler, registry):
-    def require_organization_tween(request):
-        route = request.matched_route
-        if route is None or route.name in ORGANIZATION_EXEMPT_ROUTE_NAMES:
-            return handler(request)
+def require_selected_organization(event):
+    request = event.request
+    route = request.matched_route
+    if route is None or route.name in ORGANIZATION_EXEMPT_ROUTE_NAMES:
+        return
 
-        if request.authenticated_userid and not request.session.get(
-            "selected_organization_id"
-        ):
-            return logout_user(request)
-
-        return handler(request)
-
-    return require_organization_tween
+    if request.authenticated_userid and not request.session.get(
+        "selected_organization_id"
+    ):
+        raise logout_user(request)
 
 
 class SecurityPolicy:
@@ -114,4 +111,4 @@ def includeme(config: Configurator):
     )
     config.set_default_csrf_options(require_csrf=True)
     config.set_security_policy(SecurityPolicy(settings["auth.secret"]))
-    config.add_tween("easy_diagrams.security.require_organization_tween_factory")
+    config.add_subscriber(require_selected_organization, BeforeTraversal)
