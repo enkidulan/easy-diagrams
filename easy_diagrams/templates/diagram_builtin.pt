@@ -49,6 +49,10 @@
                  hx-on-click="htmx.toggleClass('.collapsible', 'expanded'); htmx.toggleClass('.collapsible-content', 'd-none')"
                  tal:condition="can_edit"
           >(click here to edit)</small>
+          <a class="link-dark link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+             href="${request.route_url('login', _query={'next': request.url})}"
+             tal:condition="not:can_edit"
+          >Log in to edit</a>
 
 
           <div class="htmx-indicator"

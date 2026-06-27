@@ -336,6 +336,7 @@ class TestDiagramBuiltinEditor:
         testapp.logout()
         res = testapp.get(f"/diagrams/{diagram['id']}/builtin", status=200)
         assert "click here to edit" not in res.text
+        assert "Log in to edit" in res.text
         assert 'id="editor"' not in res.text
         assert 'id="spinner"' not in res.text
 
@@ -355,6 +356,7 @@ class TestDiagramBuiltinEditor:
         testapp.login(user_factory().email)
         res = testapp.get(f"/diagrams/{diagram['id']}/builtin", status=200)
         assert "click here to edit" not in res.text
+        assert "Log in to edit" in res.text
         assert 'id="editor"' not in res.text
         assert 'id="spinner"' not in res.text
 
